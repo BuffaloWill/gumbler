@@ -11,6 +11,13 @@ For example, say the .gitignore file for the project has an entry for "./conf/co
 
 ## Examples
 
+First you will want to clone a project. For example:
+
+```
+git clone [GITHUB_URL_TO_PROJECT]
+```
+Use this directory below as the {PATH_TO_GIT_PROJECT}
+
 ### Using the .gitignore as a seed list
 
 ruby gumbler.rb {PATH_TO_GIT_PROJECT} {DIRECTORY_TO_STORE_RESULTS} 
