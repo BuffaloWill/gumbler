@@ -47,7 +47,7 @@ ruby gumbler.rb -l -f passwords ./my_github_project/ /tmp/storage/
 ruby gumbler.rb --grep CVE {PATH_TO_PROJECT} {DIRECTORY_TO_STORE_DIFFS} 
 
 ```
-uby gumbler.rb --grep CVE ./my_github_project/ /tmp/storage/
+ruby gumbler.rb --grep CVE ./my_github_project/ /tmp/storage/
 ```
 
 ## TODO
