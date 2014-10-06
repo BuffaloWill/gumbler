@@ -22,18 +22,33 @@ Use this directory below as the {PATH_TO_GIT_PROJECT}
 
 ruby gumbler.rb {PATH_TO_GIT_PROJECT} {DIRECTORY_TO_STORE_RESULTS} 
 
+```
+ruby gumbler.rb ./my_github_project/ /tmp/storage/
+```
+
 ### Using the .gitignore as a seed list in a very large project (i.e. stream parse)
 
 ruby gumbler.rb --stream {PATH_TO_GIT_PROJECT} {DIRECTORY_TO_STORE_RESULTS} 
 
-### Lazy search for any file with passwords in the title 
+```
+ruby gumbler.rb --stream ./my_big_github_project/ /tmp/storage/
+```
+
+### Search for any file in any revision with passwords in the title 
 
 ruby gumbler.rb -l -f passwords {PATH_TO_GIT_PROJECT} {DIRECTORY_TO_STORE_RESULTS} 
+
+```
+ruby gumbler.rb -l -f passwords ./my_github_project/ /tmp/storage/
+```
 
 ### Looking for all commits with CVE in a commit log entry
 
 ruby gumbler.rb --grep CVE {PATH_TO_PROJECT} {DIRECTORY_TO_STORE_DIFFS} 
 
+```
+uby gumbler.rb --grep CVE ./my_github_project/ /tmp/storage/
+```
 
 ## TODO
 - Currently only searches master branch
