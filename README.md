@@ -9,6 +9,17 @@ For example, say the .gitignore file for the project has an entry for "./conf/co
 * gumbler uses OS execution and git commands to parse revisions. That is always a dangerous thing. Be confident in the github project you are searching. 
 * There are still plenty of bugs. Your mileage may vary. Turns out wildcards are hard. 
 
+## Usage
+```
+gumbler.rb GIT_PROJECT_PATH DIRECTORY_TO_STORE_RESULTS
+    -f, --file FILE                  File to search for, defaults to .gitignore list
+    -l, --lazy                       Lazy matches on filenames
+    -s, --stream                     Stream based search
+    -g, --grep string                Grep commit log for specific strings (e.g. CVE) and save the modified files to the directory
+    -b, --branch name                Specify a different branch
+    -p, --space                      Save space by not downloading large files even if they're on the gitignore (e.g. *.o, *.so, etc
+```
+
 ## Examples
 
 First you will want to clone a project. For example:
@@ -50,5 +61,8 @@ ruby gumbler.rb --grep CVE {PATH_TO_PROJECT} {DIRECTORY_TO_STORE_DIFFS}
 ruby gumbler.rb --grep CVE ./my_github_project/ /tmp/storage/
 ```
 
-## TODO
-- Currently only searches master branch
+### Search another branch besides master
+```
+ruby gumbler.rb -b DEV01 ./my_github_project/ /tmp/storage/
+```
+

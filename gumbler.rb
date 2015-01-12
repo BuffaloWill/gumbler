@@ -19,6 +19,15 @@ OptionParser.new do |opts|
   opts.on("-g", "--grep string", "Grep commit log for specific strings (e.g. CVE) and save the modified files to the directory") do |v|
     options[:grep] = v
   end
+  
+  opts.on("-b", "--branch name", "Specify a different branch") do |v|
+    options[:branch] = v
+  end 
+
+  opts.on("-p", "--space", "Save space by not downloading large files even if they're on the gitignore (e.g. *.o, *.so, etc") do |v|
+    options[:space] = v
+  end
+
 end.parse!
 
 if ARGV.size < 2
@@ -28,6 +37,9 @@ else
 	@directory = ARGV[0]
 	@matches = ARGV[1]
 end
+
+# defaults
+options[:branch] = options[:branch] ? options[:branch] : "master" 
 
 ignores = []
 if options[:file]
@@ -44,11 +56,10 @@ else
 end
 
 # take in the git @directory, push all revisions into a hash
-# TODO: this only uses the master branch
-def build_list(directory)
+def build_list(directory,options)
 	bz = {}
 	puts "|-| Jumping to remote @directory #{@directory}"
-	branches = `cd #{@directory} && git rev-list master`
+	branches = `cd #{@directory} && git rev-list #{options[:branch]}`
 
 	puts "|-| Storing every revision"
 	branches.split("\n").each do |branch|
@@ -63,9 +74,21 @@ def build_list(directory)
 	return bz
 end
 
+# check if the file extension should be ignored
+def no_fly_lst(fname)
+	no_fly = ["*.a","*.o","*.so","*.arc","*.dylib*","*.out","*.class","*.h"]
+	skip = false
+	skip = no_fly.include?(fname)
+	if fname =~ /class/
+		skip = true
+	end
+	return skip
+end
+
 def iterate_ignores(ignores,fz,options)
 	ignores.each do |ignore|
 		next unless ignore.size > 0
+		next if options[:space] and no_fly_lst(ignore)
 		puts "checking for #{ignore}.." unless options[:quiet]
 
 		fz.each do |key,value|
@@ -74,7 +97,18 @@ def iterate_ignores(ignores,fz,options)
 				next if ignore_ext.size <= 0
 				
 				value.each do |fil|
-					if fil =~ /#{ignore_ext.gsub(".","[.]")}/
+					# for the case we are looking for *.blah
+					if ignore =~ /[.]/
+						if (!(ignore =~ /\//) and fil.split(".").last == ignore_ext.split(".").last)
+							puts "|+| Looking for #{ignore}, Found it in BRANCH : #{key} #{fil}. Storing it in #{@matches}."
+							`cd #{@directory} && git show #{key}:#{fil} > #{@matches}/#{key}_#{fil.gsub("/","_")}`
+						end
+						# TODO: clean-up, also will mess up blah*something*.blah
+						if (fil.split(".").last == ignore_ext.split(".").last and fil.split("*").first.split("/").last == ignore.split("*").first.split("/").last)
+							puts "|+| Looking for #{ignore}, Found it in BRANCH : #{key} #{fil}. Storing it in #{@matches}."
+							`cd #{@directory} && git show #{key}:#{fil} > #{@matches}/#{key}_#{fil.gsub("/","_")}`
+						end
+					elsif fil =~ /#{ignore_ext}/
 						if fil =~ /\//
 							if options[:lazy]
 								puts "|+| Lazy matching for #{ignore_ext}, Found it in BRANCH : #{key} #{fil}. Storing it in #{@matches}."
@@ -130,7 +164,7 @@ if(options[:grep])
 
 else
 	if(options[:stream])
-		branches = `cd #{@directory} && git rev-list master`
+		branches = `cd #{@directory} && git rev-list #{options[:branch]}`
 		
 		puts "|!| Stream based parsing, Total Branches: #{branches.split("\n").size}"
 		
@@ -150,7 +184,7 @@ else
 			puts "#{total} of #{branches.split("\n").size} complete"
 		end		
 	else
-		fz = build_list(@directory)
+		fz = build_list(@directory,options)
 		iterate_ignores(ignores,fz,options)
 	end
 end
