@@ -9,6 +9,13 @@ For example, say the .gitignore file for the project has an entry for "./conf/co
 * gumbler uses OS execution and git commands to parse revisions. That is always a dangerous thing. Be confident in the github project you are searching. 
 * There are still plenty of bugs. Your mileage may vary. Turns out wildcards are hard. 
 
+## Blog Posts
+Blog posts on using gumbler:
+
+[Post 1: Searching Github commits](http://www.silentrobots.com/blog/2014/10/06/gumbler/)
+
+[Post 2: Search all Github repositories for an Organzation](http://www.silentrobots.com/blog/2015/01/09/gumbler-updates/)
+
 ## Usage
 ```
 gumbler.rb GIT_PROJECT_PATH DIRECTORY_TO_STORE_RESULTS
