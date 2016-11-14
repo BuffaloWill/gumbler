@@ -12,9 +12,9 @@ For example, say the .gitignore file for the project has an entry for "./conf/co
 ## Blog Posts
 Blog posts on using gumbler:
 
-[Post 1: Searching Github commits](http://www.silentrobots.com/blog/2014/10/06/gumbler/)
+[Post 1: Searching Github commits](https://www.silentrobots.com/blog/2014/10/05/gumbler/)
 
-[Post 2: Search all Github repositories for an Organzation](http://www.silentrobots.com/blog/2015/01/09/gumbler-updates/)
+[Post 2: Search all Github repositories for an Organzation](https://www.silentrobots.com/blog/2015/01/09/gumbler-updates/)
 
 ## Usage
 ```
