@@ -136,10 +136,19 @@ def temp_print():
 		for val in value:
 			print "|+| File:"+val
 
+def usage():
+	parser.print_help()	
+
+
 if args.json:
 	datas = json.load(open(args.json))
 	print "|+| Writing output to "+"./output/"+args.json+".html"
 	json_to_html(datas,args.json)
+	sys.exit(0)
+
+if args.repo == "":
+	print "|!| Supply repo"
+	usage()
 	sys.exit(0)
 
 try:
