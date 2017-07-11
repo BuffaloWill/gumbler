@@ -31,6 +31,7 @@ def is_ascii(s):
 
 
 def main():
+	print "HI"
     return render_template('index.html')
 
 def projects():
@@ -91,6 +92,10 @@ app.add_url_rule('/display', 'display', display)
 
 # display a project /project?project=x
 app.add_url_rule('/project', 'project', project)
+
+# index
+app.add_url_rule('/index', 'main', main)
+
 
 if __name__ == "__main__":
 	app.run(debug=True)
