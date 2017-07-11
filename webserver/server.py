@@ -31,8 +31,7 @@ def is_ascii(s):
 
 
 def main():
-	print "HI"
-    return render_template('index.html')
+	return render_template('index.html')
 
 def projects():
 	projects = set()
@@ -67,8 +66,6 @@ def files():
 			if file in data["file"]:
 				projects.add(data)
 	return render_template('display.html',projects=projects)
-
-
 
 def display():
 	projects = []
