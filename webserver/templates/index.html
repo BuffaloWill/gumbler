@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Python Flask Bucket List App</title>
+
+
+    <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="http://getbootstrap.com/examples/jumbotron-narrow/jumbotron-narrow.css" rel="stylesheet">
+
+
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header">
+            <nav>
+                <ul class="nav nav-pills pull-right">
+                    <li role="presentation" class="active"><a href="#">Home</a>
+                    </li>
+                </ul>
+            </nav>
+            <h3 class="text-muted">Gumbler Data</h3>
+        </div>
+
+        <div class="row marketing">
+            <div class="col-lg-6">
+                <a href="/list"><h4>List of all projects</h4></a>
+                
+                <a href="/files?file=gemfile"><h4>Display all files matching name</h4></a>
+
+                <a href="/display?filename=[filename]"><h4>Display file name</h4></a>
+
+                <a href="/project?project=x"><h4>Display a project</h4></a>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>Gumbler</p>
+        </footer>
+
+    </div>
+</body>
+
+</html>
