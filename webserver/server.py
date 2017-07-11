@@ -59,12 +59,16 @@ def project():
 
 def files():
 	projects = set()
+	file = request.args.get("file")
+
 	for datax in json_l:
 		data = json.loads(datax)
 		if len(data) > 0:
-			if 'file' in data:
-				projects.add(data["file"])
+			if file in data["file"]:
+				projects.add(data)
 	return render_template('display.html',projects=projects)
+
+
 
 def display():
 	projects = []
