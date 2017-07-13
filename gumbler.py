@@ -11,7 +11,7 @@ from webserver import server
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-r','--repo', help='Repo to check', default="", required=False)
-parser.add_argument('-p','--project', help='Remote project to check IMPLEMENT', default="", required=False)
+parser.add_argument('-p','--project', help='Remote project to check', default="", required=False)
 parser.add_argument('-s','--store', help='Where to store project, defaults to /tmp IMPLEMENT', default="", required=False)
 parser.add_argument('-g','--gitignore', help='Gitignore file', default="", required=False)
 parser.add_argument('-b','--branch', help='git branch', default="", required=False)
@@ -24,7 +24,10 @@ args = parser.parse_args()
 # initialize variables
 hits = {}
 #no_fly = ["*.a","*.o","*.so","*.arc","*.dylib*","*.out","*.class"]
-no_fly = ["pom.xml","Gemfile","Gemfile.lock","gradle-wrapper.jar"]
+#no_fly = ["pom.xml","Gemfile","Gemfile.lock","gradle-wrapper.jar"]
+
+# no_fly is a list of files that you might want to avoid viewing due to the high hit rate, e.g. Gemfile
+no_fly = []
 result = {}
 
 if args.output == "server":
@@ -43,28 +46,31 @@ def add_to_commits(commit, file):
 	else:
 		hits[commit] = [file]
 
-def compare_ignore_list(ignore_list, file, commit):
-	for ignore in ignore_list:
-		if ("*" in ignore) and not (ignore in no_fly):
-			if ignore.count("*") == 1:
-				if "."+file.split(".")[-1] == "."+ignore.split("*.")[-1]:
+# Iterate each file in target list against commits
+def compare_target_list(target_list, file, commit):
+	for target in target_list:
+		# TODO: this ignores multiple *'s, e.g. /*log*/*
+		if ("*" in target) and not (target in no_fly):
+			if target.count("*") == 1:
+				if "."+file.split(".")[-1] == "."+target.split("*.")[-1]:
 					add_to_commits(str(commit), file+"_NO_DOWNLOAD")
-		if file in ignore:
+		if file in target:
 			add_to_commits(str(commit), file)
 
+# Alternative way to iterate commits, not used right now
 def iterate_commits(commits):
 	for commit in commits:
 		diff_files = []
 		for parent in commit.parents:
 			for x in commit.diff(parent):
-				compare_ignore_list(ignores,x.b_path,commit)
+				compare_target_list(ignores,x.b_path,commit)
 
+# Take in a list of commits for a branch and check for target files
 def iterate_commits_ba(commits):
 	for commit in commits:
 		files =  commit.stats.files
 		for path,value in files.items():
-#			print path
-			compare_ignore_list(ignores,path,commit)
+			compare_target_list(ignores,path,commit)
 
 def clean(branch):
 	if branch[0] == "*":
@@ -77,6 +83,13 @@ def checks():
    		extras = f.read().splitlines()
 	return extras
 
+# gets the file contents given a commit hash and filename
+def get_file_contents(key,val):
+	try:
+		return Repo(args.repo).git.show(key+":"+val)
+	except Exception as e:
+		return "|!| Error pulling file, used command 'git show "+key+":"+val+"'"
+
 def create_output():
 	results = []
 	for key,value in hits.iteritems():
@@ -86,16 +99,28 @@ def create_output():
 		result["commit"] = str(key)
 		for val in value:
 			if not ("NO_DOWNLOAD" in val):
-				result["project"] = args.project
-				url = "https://raw.githubusercontent.com/"+args.project+"/"+key+"/"+val
-				result["url"] = url
-				result["file"] = val
-				result["results"] = requests.get(url).text
+				if "LOCAL_" in args.project:
+					result["project"] = args.repo
+					result["url"] = "git show "+key+":"+val
+					result["file"] = val
+					result["results"] = get_file_contents(key,val)
+				else:
+					result["project"] = args.project
+					url = "https://raw.githubusercontent.com/"+args.project+"/"+key+"/"+val
+					result["url"] = url
+					result["file"] = val
+					result["results"] = get_file_contents(key,val)
 			else:
-				result["project"] = args.project
-				url = "https://raw.githubusercontent.com/"+args.project+"/"+key+"/"+val.split("_NO_DOWNLOAD")[0]
-				result["url"] = url
-				result["results"] = "NOT DOWNLOADED"
+				if "LOCAL_" in args.project:
+					result["project"] = args.repo
+					result["url"] = "git show "+key+":"+string.replace(val,"_NO_DOWNLOAD","")
+					result["file"] = string.replace(val,"_NO_DOWNLOAD","")
+					result["results"] = "NOT RETRIEVED, LIKELY BINARY CONTENT"
+				else:
+					result["project"] = args.project
+					url = "https://raw.githubusercontent.com/"+args.project+"/"+key+"/"+val.split("_NO_DOWNLOAD")[0]
+					result["url"] = url
+					result["results"] = "NOT DOWNLOADED, LIKELY BINARY CONTENT"
 		results.append(result)
 
 	with open("./output/"+string.replace(args.project,"/","_")+".json", 'w') as the_file:
@@ -150,6 +175,9 @@ if args.repo == "":
 	print "|!| Supply repo"
 	usage()
 	sys.exit(0)
+
+if args.project == "":
+	args.project = "LOCAL_"+args.repo
 
 try:
     repo = Repo(args.repo)

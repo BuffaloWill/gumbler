@@ -12,6 +12,7 @@ from os.path import isfile, join
 dira = ""
 json_l = []
 
+# this loads all json files into memory, /me ducks
 def load_projects():
 	only = [f for f in listdir(dira) if isfile(join(dira, f))]
 	for file in only:
@@ -22,16 +23,13 @@ def load_projects():
 	print len(json_l)
 
 app = Flask(__name__)
-
 @app.route("/")
+def main():
+	return render_template('index.html')
 
 # move to library
 def is_ascii(s):
     return all(ord(c) < 128 for c in s)
-
-
-def main():
-	return render_template('index.html')
 
 def projects():
 	projects = set()

@@ -1,7 +1,35 @@
 # gumbler
 
+Gumbler is a tool to dig for sensitive files committed in the history of the project. It uses the .gitignore and a starter file (i.e. files_to_look_for.txt) as a seed list. It then checks every branch and commit to see if that file was committed at some point. 
 
-~~gumbler was a one-off script to search through Git project history.~~
-gumbler is going through a re-write with a move over to python, still running against projects IRL before commiting (05/15/17). 
+## Usage
+
+### To parse a repo cloned from github and view the results:
+```
+python gumbler.py -r "./projects/[REPO_NAME]" -a -p "[ORG_NAME]/[REPO_NAME]"
+python gumbler.py -o server -x "./output"
+```
+
+### To parse a local repo and view the results:
+```
+python gumbler.py -r "./projects/[REPO_NAME]" -a 
+python gumbler.py -o server -x "./output"
+```
 
 
+## Features:
+
+- Lightweight, portable results (i.e. json, html)
+- View and search the results via flask server
+- No Github API keys required. It can be used against repo's discovered during OSINT and not tied to Github.
+
+
+## Future Features:
+
+- (Goal) Support svn and mecurial
+- Add vulnerability checks through the webserver (e.g. find potential AWS keys)
+
+
+## Warning
+
+There are lots of bugs and, quite a few, false negatives. Please create an issue if you find something. The project is being actively maintained.
