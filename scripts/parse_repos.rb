@@ -26,7 +26,7 @@ data_hash.each do |hash|
       `git clone #{hash["clone_url"]}`
       
       # Gumbler requires full directory paths
-      #`ruby ~/gumbler/gumbler.rb -s -p #{hash["name"]} ~/[ORG]/results/`
+      puts `python gumbler.py -r "./projects/#{hash["name"]}" -a -p "#{org}/#{hash["name"]}"`
 
       sleep(3)
   end
