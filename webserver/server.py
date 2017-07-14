@@ -39,6 +39,16 @@ def projects():
 			projects.add(data["project"])
 	return render_template('project.html',projects=projects)
 
+def org():
+	projects = set()
+	org = request.args.get("org")
+	for datax in json_l:
+		data = json.loads(datax)
+		if len(data) > 0:
+			if org in data["project"]:
+				projects.add(data["project"])
+	return render_template('project.html',projects=projects)
+
 def project():
 	projects = []
 	project = request.args.get("project")
@@ -96,6 +106,9 @@ app.add_url_rule('/display', 'display', display)
 
 # display a project /project?project=x
 app.add_url_rule('/project', 'project', project)
+
+# display a project /org?org=x
+app.add_url_rule('/org', 'org', org)
 
 # index
 app.add_url_rule('/index', 'main', main)
