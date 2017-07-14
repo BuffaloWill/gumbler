@@ -55,15 +55,20 @@ def project():
 	return render_template('display.html',projects=projects)
 
 def files():
-	projects = set()
+	projects = []
 	file = request.args.get("file")
 
 	for datax in json_l:
 		data = json.loads(datax)
 		if len(data) > 0:
-			if 'file' in data and file == data["file"]:
-				projects.add(data)
-	return render_template('display.html',projects=projects)
+			if 'file' in data and file in data["file"]:
+				if data["results"] == "NOT DOWNLOADED":
+					data["not_downloaded"] = True
+				if is_ascii(data["results"]):
+					data["is_ascii"] = True
+					data["results"] = data["results"].replace("<","&lt;").replace(">","&gt;")
+				projects.append(data)
+	return render_template('file_list.html',projects=projects)
 
 def display():
 	projects = []

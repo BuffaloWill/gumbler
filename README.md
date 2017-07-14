@@ -16,6 +16,8 @@ python gumbler.py -r "./projects/[REPO_NAME]" -a
 python gumbler.py -o server -x "./output"
 ```
 
+### To view all files from results containing yml
+http://localhost:5000/files?file=yml
 
 ## Features:
 
