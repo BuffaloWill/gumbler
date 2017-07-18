@@ -1,0 +1,24 @@
+version: '2'
+services:
+  database:
+    image: mongo:latest
+    environment:
+      - MONGO_DATA_DIR=/data/db
+      - MONGO_LOG_DIR=/dev/null
+    networks:
+      - default
+    volumes:
+      - ./data/db:/data/db
+    restart: always
+  web:
+    build:
+      context: .
+      dockerfile: ./docker/web
+    command: python /app/gumbler.py -o server -x "./output/"
+    ports:
+      - 8000:8000
+    links:
+      - database
+    networks:
+      - default
+    restart: always
