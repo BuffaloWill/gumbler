@@ -16,7 +16,7 @@ services:
       dockerfile: ./docker/web
     command: python /app/gumbler.py -o server -x "./output/"
     ports:
-      - 8000:8000
+      - 5000:5000
     links:
       - database
     networks:
