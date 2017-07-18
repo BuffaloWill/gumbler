@@ -9,6 +9,7 @@ import string
 import json
 from webserver import server
 import re
+import fnmatch
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-r','--repo', help='Repo to check', default="", required=False)
@@ -50,10 +51,9 @@ def add_to_commits(commit, file):
 # Iterate each file in target list against commits
 def compare_target_list(target_list, file, commit):
 	for target in target_list:
-		# TODO: this ignores multiple *'s, e.g. /*log*/*
 		if ("*" in target) and not (target in no_fly):
 			try:
-				regex = re.compile(target)
+				regex = re.compile(fnmatch.translate(target))
 				if regex.search(file):
 					add_to_commits(str(commit), file+"_NO_DOWNLOAD")
 			except Exception as e:
