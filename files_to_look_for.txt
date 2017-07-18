@@ -30,8 +30,8 @@ ssh/config
 pem
 keypair
 pkcs12
-pfx
-p12
+*.pfx
+*.p12
 asc
 otr.private_key
 mysql_history
