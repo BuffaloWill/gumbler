@@ -56,8 +56,8 @@ def compare_target_list(target_list, file, commit):
 				regex = re.compile(target)
 				if regex.search(file):
 					add_to_commits(str(commit), file+"_NO_DOWNLOAD")
-				except Exception as e:
-					"ignore error"
+			except Exception as e:
+				"ignore error"
 		if file in target:
 			add_to_commits(str(commit), file)
 
