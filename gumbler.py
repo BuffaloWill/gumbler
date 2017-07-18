@@ -58,7 +58,7 @@ def compare_target_list(target_list, file, commit):
 					add_to_commits(str(commit), file+"_NO_DOWNLOAD")
 			except Exception as e:
 				"ignore error"
-		if file in target:
+		if target in file:
 			add_to_commits(str(commit), file)
 
 # Alternative way to iterate commits, not used right now
