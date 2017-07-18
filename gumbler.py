@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#!/usr/bin/python
 
 import argparse
 import os
@@ -87,6 +87,12 @@ def checks():
    		extras = f.read().splitlines()
 	return extras
 
+def get_project_url(project):
+	try:
+		return Repo(project).config_reader().get_value("remote \"origin\"","url")
+	except Exception as e:
+		return "Could not find a project URL"
+
 # gets the file contents given a commit hash and filename
 def get_file_contents(key,val):
 	try:
@@ -105,11 +111,13 @@ def create_output():
 			if not ("NO_DOWNLOAD" in val):
 				if "LOCAL_" in args.project:
 					result["project"] = args.repo
-					result["url"] = "git show "+key+":"+val
+					result["project_url"] = get_project_url(args.repo)
+					result["cmd"] = "git show "+key+":"+val
 					result["file"] = val
 					result["results"] = get_file_contents(key,val)
 				else:
 					result["project"] = args.project
+					result["project_url"] = get_project_url(args.repo)					
 					url = "https://raw.githubusercontent.com/"+args.project+"/"+key+"/"+val
 					result["url"] = url
 					result["file"] = val
@@ -117,11 +125,13 @@ def create_output():
 			else:
 				if "LOCAL_" in args.project:
 					result["project"] = args.repo
-					result["url"] = "git show "+key+":"+string.replace(val,"_NO_DOWNLOAD","")
+					result["project_url"] = get_project_url(args.repo)
+					result["cmd"] = "git show "+key+":"+string.replace(val,"_NO_DOWNLOAD","")
 					result["file"] = string.replace(val,"_NO_DOWNLOAD","")
 					result["results"] = "NOT RETRIEVED, LIKELY BINARY CONTENT"
 				else:
 					result["project"] = args.project
+					result["project_url"] = get_project_url(args.repo)					
 					url = "https://raw.githubusercontent.com/"+args.project+"/"+key+"/"+val.split("_NO_DOWNLOAD")[0]
 					result["url"] = url
 					result["results"] = "NOT DOWNLOADED, LIKELY BINARY CONTENT"
@@ -209,7 +219,6 @@ else:
 			ignores.append(line)
 
 ignores = ignores + checks()
-# git rev-list --all --remotes | wc -l
 
 try:
 	br = ""

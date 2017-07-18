@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>Python Flask Bucket List App</title>
+    <title>Gumbler</title>
 
 
     <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -18,7 +18,7 @@
         <div class="header">
             <nav>
                 <ul class="nav nav-pills pull-right">
-                    <li role="presentation" class="active"><a href="#">Home</a>
+                    <li role="presentation" class="active"><a href="/">Home</a>
                     </li>
                 </ul>
             </nav>
@@ -34,14 +34,25 @@
                 <td><h3>Commit:{{ result["commit"] }}<h3></td>
             </tr>
             {% if 'not_downloaded' in result %}
+            {% if "url" in result %}
             <tr>
-                <td>ND:<a href="{{ result["url"] }}">{{ result["url"] }}</a></td>
+                <td>ND: <a href="{{ result["url"] }}">{{ result["url"] }}</a></td>
             </tr>
             {% else %}
             <tr>
+                <td>Command: {{ result["cmd"] }}</a></td>
+            </tr>
+            {% endif %}
+            {% else %}
+            {% if "url" in result %}
+            <tr>
                 <td><a href="{{ result["url"] }}">{{ result["url"] }}</a></td>
             </tr>
-
+            {% else %}
+            <tr>
+                <td>Command: {{ result["cmd"] }}</a></td>
+            </tr>
+            {% endif %}
             <tr>
             {% if 'is_ascii' in result %}
                 <td><pre><code>{{ result["results"] }}</code></pre></td>
@@ -58,7 +69,7 @@
        {% endfor %}            
 
         <footer class="footer">
-            <p>&copy; Company 2015</p>
+            <p>Gumbler</p>
         </footer>
 
     </div>
