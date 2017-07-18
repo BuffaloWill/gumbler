@@ -8,6 +8,7 @@ import requests
 import string 
 import json
 from webserver import server
+import re
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-r','--repo', help='Repo to check', default="", required=False)
@@ -54,6 +55,13 @@ def compare_target_list(target_list, file, commit):
 			if target.count("*") == 1:
 				if "."+file.split(".")[-1] == "."+target.split("*.")[-1]:
 					add_to_commits(str(commit), file+"_NO_DOWNLOAD")
+			else:
+				try:
+					regex = re.compile(giti)
+					if regex.search(file):
+						add_to_commits(str(commit), file+"_NO_DOWNLOAD")
+				except Exception as e:
+					"ignore error"
 		if file in target:
 			add_to_commits(str(commit), file)
 
