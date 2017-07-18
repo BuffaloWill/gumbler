@@ -82,11 +82,13 @@ def clean(branch):
 	else:
 		return branch.split(" ")[2]
 
+# read in the list of common files
 def checks():
 	with open("files_to_look_for.txt") as f:
    		extras = f.read().splitlines()
 	return extras
 
+# get the remote origin project url from the configuration
 def get_project_url(project):
 	try:
 		return Repo(project).config_reader().get_value("remote \"origin\"","url")
@@ -100,6 +102,7 @@ def get_file_contents(key,val):
 	except Exception as e:
 		return "|!| Error pulling file, used command 'git show "+key+":"+val+"'"
 
+# create the json file from the results
 def create_output():
 	results = []
 	for key,value in hits.iteritems():
@@ -142,9 +145,11 @@ def create_output():
 
 	print "|+| Wrote output to "+"./output/"+string.replace(args.project,"/","_")+".json"
 
+# check if the file contains non-ascii chars, if so don't present in the server
 def is_ascii(s):
     return all(ord(c) < 128 for c in s)
 
+# convert the json file to html output, kind of ugly
 def json_to_html(datas,name):
 	with open(name+".html", 'w') as the_file:
 		myfile = open("./output/template.html","r")
@@ -175,9 +180,9 @@ def temp_print():
 		for val in value:
 			print "|+| File:"+val
 
+# print usage info
 def usage():
 	parser.print_help()	
-
 
 if args.json:
 	datas = json.load(open(args.json))
