@@ -1,15 +1,13 @@
-FROM ruby:latest
+FROM python:2.7
 MAINTAINER BuffaloWill
 COPY . /app
 RUN apt-get update && \
     apt-get install -y git python-pip curl && \
     cd /app && \
-    git clone https://github.com/BuffaloWill/gumbler.git && \
-    cd gumbler && \
     pip install -r requirements.txt && \
     pip install requests && \
     mkdir projects && \
     cd projects && \
-    git clone https://github.com/BuffaloWill/gumbler.git && \
+    git clone https://github.com/BuffaloWill/NaughtyGitProject.git && \
     cd .. && \
-    python gumbler.py -r "./projects/gumbler" -a -p "BuffaloWill/gumbler"
+    python /app/gumbler.py -r "/app/projects/NaughtyGitProject" -a -p "BuffaloWill/NaughtyGitProject"
