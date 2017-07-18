@@ -52,14 +52,10 @@ def compare_target_list(target_list, file, commit):
 	for target in target_list:
 		# TODO: this ignores multiple *'s, e.g. /*log*/*
 		if ("*" in target) and not (target in no_fly):
-			if target.count("*") == 1:
-				if "."+file.split(".")[-1] == "."+target.split("*.")[-1]:
+			try:
+				regex = re.compile(target)
+				if regex.search(file):
 					add_to_commits(str(commit), file+"_NO_DOWNLOAD")
-			else:
-				try:
-					regex = re.compile(giti)
-					if regex.search(file):
-						add_to_commits(str(commit), file+"_NO_DOWNLOAD")
 				except Exception as e:
 					"ignore error"
 		if file in target:
