@@ -19,6 +19,7 @@ parser.add_argument('-b','--branch', help='git branch', default="", required=Fal
 parser.add_argument('-a','--all', help='iterate all branches', action='store_true', required=False)
 parser.add_argument('-j','--json', help='convert json to html', default="", required=False)
 parser.add_argument('-x','--server', help='Directory to server content from', default="NULL", required=False)
+parser.add_argument('-l','--listen', help='Address to bind server to', default="127.0.0.1", required=False)
 parser.add_argument('-o','--output', help='By default output is json. Other options: html,server', default="json", required=False)
 args = parser.parse_args()
 
@@ -37,7 +38,7 @@ if args.output == "server":
 		sys.exit()
 	server.dira = args.server
 	server.load_projects()
-	server.app.run()
+	server.app.run(host=args.listen)
 	sys.exit()
 
 def add_to_commits(commit, file):

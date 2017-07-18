@@ -14,7 +14,7 @@ services:
     build:
       context: .
       dockerfile: ./docker/web
-    command: python /app/gumbler.py -o server -x "/app/output/"
+    command: python /app/gumbler.py -o server -l 0.0.0.0 -x "/app/output/"
     ports:
       - 5000:5000
     links:
