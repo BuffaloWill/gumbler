@@ -113,7 +113,7 @@ def run_regex(regexes):
 		if len(data) > 0:
 			for regex in regexes:
 				reg = re.compile(regex)
-				if !("Error pulling file" in data["results"]) and reg.search(data["results"]):					
+				if (not ("Error pulling file" in data["results"]) and reg.search(data["results"])):					
 					if data["results"] == "NOT DOWNLOADED":
 						data["not_downloaded"] = True
 					if is_ascii(data["results"]):
