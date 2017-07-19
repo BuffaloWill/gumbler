@@ -19,6 +19,12 @@ python gumbler.py -o server -x "./output"
 ### To view all files from results containing yml
 http://localhost:5000/files?file=yml
 
+## Installation
+
+- [Docker](https://github.com/BuffaloWill/gumbler/wiki/Installation-Instructions#docker)
+- [Developer Build](https://github.com/BuffaloWill/gumbler/wiki/Installation-Instructions#dev-build)
+
+
 ## Features:
 
 - Lightweight, portable results (i.e. json, html)
