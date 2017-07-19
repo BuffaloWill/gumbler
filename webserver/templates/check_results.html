@@ -37,6 +37,10 @@
             <tr>
                 <td><h4>Commit:{{ result["commit"] }}<h4></td>
             </tr>
+            <tr>
+                <td><h4>Regex:{{ result["regex"] }}<h4></td>
+            </tr>
+
             {% if 'not_downloaded' in result %}
             {% if "url" in result %}
             <tr>

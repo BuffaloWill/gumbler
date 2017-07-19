@@ -92,6 +92,7 @@ npmrc
 terraform.tfvars
 config.json
 bower.json
-travis.yml
+.travis.yml
 composer
-logs
+/*logs*/
+/*log*/
