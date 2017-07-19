@@ -1,0 +1,13 @@
+FROM python:2.7
+MAINTAINER BuffaloWill
+COPY . /app
+RUN apt-get update && \
+    apt-get install -y git python-pip curl && \
+    cd /app && \
+    pip install -r requirements.txt && \
+    pip install requests && \
+    mkdir projects && \
+    cd projects && \
+    git clone https://github.com/BuffaloWill/NaughtyGitProject.git && \
+    cd .. && \
+    python /app/gumbler.py -r "/app/projects/NaughtyGitProject" -a -p "BuffaloWill/NaughtyGitProject"
