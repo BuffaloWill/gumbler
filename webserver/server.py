@@ -113,12 +113,14 @@ def run_regex(regexes):
 		if len(data) > 0:
 			for regex in regexes:
 				reg = re.compile(regex)
-				if (not ("Error pulling file" in data["results"]) and reg.search(data["results"])):					
+				match = reg.search(data["results"])
+				if (not ("Error pulling file" in data["results"]) and match):					
 					if data["results"] == "NOT DOWNLOADED":
 						data["not_downloaded"] = True
 					if is_ascii(data["results"]):
 						data["is_ascii"] = True
 						data["results"] = data["results"].replace("<","&lt;").replace(">","&gt;")
+					data["match"] = match.group(0)
 					results.append(data)
 	return results
 

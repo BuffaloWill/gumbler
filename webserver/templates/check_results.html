@@ -58,13 +58,9 @@
             </tr>
             {% endif %}
             <tr>
-            {% if 'is_ascii' in result %}
-                <td><pre><code>{{ result["results"] }}</code></pre></td>
-            {% else %}
-                <td><pre><code>BINARY IN FILE, DOWNLOAD RAW</code></pre></td>
+            <td><pre><code>{{ result["match"] }}</code></pre></td>
             </tr>
 
-            {% endif %}
             {% endif %}
             </table>
             </div>
