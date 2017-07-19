@@ -1,8 +1,9 @@
 FROM python:2.7
 MAINTAINER BuffaloWill
 COPY . /app
+EXPOSE 27017
 RUN apt-get update && \
-    apt-get install -y git python-pip curl && \
+    apt-get install -y git python-pip curl mongodb && \
     cd /app && \
     pip install -r requirements.txt && \
     pip install requests && \
