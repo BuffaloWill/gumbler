@@ -19,7 +19,7 @@ json_l = []
 app = Flask(__name__)
 
 # initialize the db, allow user specficied later
-app.config['MONGO_URI'] = 'mongodb://127.0.0.1:27017/gumbler'
+app.config['MONGO_DBNAME'] = 'gumbler'
 mongo = PyMongo(app, config_prefix='MONGO')
 
 @app.route("/")
