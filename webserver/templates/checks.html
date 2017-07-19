@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Gumber Server</title>
+
+
+    <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="http://getbootstrap.com/examples/jumbotron-narrow/jumbotron-narrow.css" rel="stylesheet">
+
+
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header">
+            <nav>
+                <ul class="nav nav-pills pull-right">
+                    <li role="presentation" class="active"><a href="/">Home</a>
+                    </li>
+                </ul>
+            </nav>
+            <h3 class="text-muted">Source Checks</h3>
+        </div>
+
+        <div class="row marketing">
+            <div class="col-lg-6">
+            <table>
+            {% for result in txt_checks %}
+            <tr>
+                <td><a href="/run_check?check={{ result['filename'] }}">{{ result['name'] }}</a></td>
+                <td>Description: {{ result['description'] }}</td>
+            </tr>
+            {% endfor %}            
+            </table>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>&copy; Gumbler</p>
+        </footer>
+
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Gumbler</title>
+
+
+    <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="http://getbootstrap.com/examples/jumbotron-narrow/jumbotron-narrow.css" rel="stylesheet">
+
+
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header">
+            <nav>
+                <ul class="nav nav-pills pull-right">
+                    <li role="presentation" class="active"><a href="/">Home</a>
+                    </li>
+                </ul>
+            </nav>
+            <h3 class="text-muted">Check Results</h3>
+        </div>
+
+        {% for result in results %}
+
+        <div class="row marketing">
+            <div class="col-lg-6">
+            <table>
+            <tr>
+                <td><h3>Project:{{ result["project"] }} ({{ result["project_url"] }})<h3></td>
+            </tr>
+
+            <tr>
+                <td><h4>Commit:{{ result["commit"] }}<h4></td>
+            </tr>
+            {% if 'not_downloaded' in result %}
+            {% if "url" in result %}
+            <tr>
+                <td>ND: <a href="{{ result["url"] }}">{{ result["url"] }}</a></td>
+            </tr>
+            {% else %}
+            <tr>
+                <td>Command: {{ result["cmd"] }}</a></td>
+            </tr>
+            {% endif %}
+            {% else %}
+            {% if "url" in result %}
+            <tr>
+                <td><a href="{{ result["url"] }}">{{ result["url"] }}</a></td>
+            </tr>
+            {% else %}
+            <tr>
+                <td>Command: {{ result["cmd"] }}</a></td>
+            </tr>
+            {% endif %}
+            <tr>
+            {% if 'is_ascii' in result %}
+                <td><pre><code>{{ result["results"] }}</code></pre></td>
+            {% else %}
+                <td><pre><code>BINARY IN FILE, DOWNLOAD RAW</code></pre></td>
+            </tr>
+
+            {% endif %}
+            {% endif %}
+            </table>
+            </div>
+        </div>
+
+       {% endfor %}            
+
+        <footer class="footer">
+            <p>Gumbler</p>
+        </footer>
+
+    </div>
+</body>
+
+</html>
