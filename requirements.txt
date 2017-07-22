@@ -3,4 +3,3 @@ gitpython
 argparse
 flask
 pymongo
-flask-pymongo
