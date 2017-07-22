@@ -9,5 +9,4 @@ RUN apt-get update && \
     mkdir projects && \
     cd projects && \
     git clone https://github.com/BuffaloWill/NaughtyGitProject.git && \
-    cd .. && \
-    python /app/gumbler.py -r "/app/projects/NaughtyGitProject" -a -p "BuffaloWill/NaughtyGitProject"
+    cd ..

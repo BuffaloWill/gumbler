@@ -3,13 +3,17 @@
 import argparse
 import os
 import sys
-from git import *
 import requests
 import string 
 import json
-from webserver import server
 import re
 import fnmatch
+from pymongo import MongoClient
+from webserver import server
+from git import *
+from datetime import datetime
+from bson import Binary, Code
+from bson.json_util import dumps
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-r','--repo', help='Repo to check', default="", required=False)
@@ -22,6 +26,8 @@ parser.add_argument('-j','--json', help='convert json to html', default="", requ
 parser.add_argument('-x','--server', help='Directory to server content from', default="NULL", required=False)
 parser.add_argument('-l','--listen', help='Address to bind server to', default="127.0.0.1", required=False)
 parser.add_argument('-o','--output', help='By default output is json. Other options: html,server', default="json", required=False)
+parser.add_argument('-m','--mongo', help='Mongodb host IP server', default="127.0.0.1", required=False)
+parser.add_argument('-d','--dir', help='Directory containing checks', default="", required=False)
 args = parser.parse_args()
 
 # initialize variables
@@ -33,14 +39,41 @@ hits = {}
 no_fly = []
 result = {}
 
+# initialize mongodb
+client = MongoClient('mongodb://'+args.mongo+':27017/gumbler')
+db = client.gumbler
+
+# these are common checks to look for in input
+def load_checks():
+
+	if args.dir:
+		ws_dir = os.path.join(args.dir+"/webserver/checks/")
+	else:
+		ws_dir = os.path.join(os.getcwd()+"/webserver/checks/")
+
+	for filename in os.listdir(ws_dir):
+		data = json.load(open(ws_dir+filename))
+		data["filename"] = filename
+
+		# load the check, must be unique by name
+		if db.checks.find_one({"name":data["name"]}) == None:
+			db.checks.insert_one(json.loads(dumps(data)))
+
 if args.output == "server":
 	if args.server == "NULL":
 		print("Please provide a directory containing JSON files \n \t\t python gumbler.py -o server -x ./output/")
 		sys.exit()
 	server.dira = args.server
-	server.load_projects()
+	if args.mongo:
+		server.mongo = args.mongo
+	else:
+		server.mongo = "localhost"
+	load_checks()
+	print("|+| Using db, "+'mongodb://'+server.mongo+':27017/gumbler')
+	server.db = db
 	server.app.run(host=args.listen)
 	sys.exit()
+
 
 def add_to_commits(commit, file):
 	if commit in hits:
@@ -108,11 +141,11 @@ def create_output():
 	results = []
 	for key,value in hits.iteritems():
 		result = {}
-
-		# open the output file
+		
 		result["commit"] = str(key)
 		for val in value:
 			if not ("NO_DOWNLOAD" in val):
+				result["date"] = str(datetime.now())				
 				if "LOCAL_" in args.project:
 					result["project"] = args.repo
 					result["project_url"] = get_project_url(args.repo)
@@ -139,12 +172,23 @@ def create_output():
 					url = "https://raw.githubusercontent.com/"+args.project+"/"+key+"/"+val.split("_NO_DOWNLOAD")[0]
 					result["url"] = url
 					result["results"] = "NOT DOWNLOADED, LIKELY BINARY CONTENT"
+		# insert the finding into an array to return a json file		
 		results.append(result)
 
+		# check existing values in the database to make sure we don't duplicate
+		#   commit and filename together are unique		
+		if db.findings.find_one({"commit":str(key),"file":val}) == None:
+			# insert the finding into database	
+			db.findings.insert_one(json.loads(dumps(result)))
+		else:
+			print("|+| Finding not unique, not adding to the database "+str(key)+":"+val)
+	
 	with open("./output/"+string.replace(args.project,"/","_")+".json", 'w') as the_file:
 		the_file.write(json.dumps(results))
 
+	print("|+| Updated MongoDB")
 	print("|+| Wrote output to "+"./output/"+string.replace(args.project,"/","_")+".json")
+
 
 # check if the file contains non-ascii chars, if so don't present in the server
 def is_ascii(s):

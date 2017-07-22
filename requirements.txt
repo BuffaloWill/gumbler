@@ -2,3 +2,4 @@ requests
 gitpython
 argparse
 flask
+pymongo
