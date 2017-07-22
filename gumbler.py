@@ -26,6 +26,8 @@ parser.add_argument('-j','--json', help='convert json to html', default="", requ
 parser.add_argument('-x','--server', help='Directory to server content from', default="NULL", required=False)
 parser.add_argument('-l','--listen', help='Address to bind server to', default="127.0.0.1", required=False)
 parser.add_argument('-o','--output', help='By default output is json. Other options: html,server', default="json", required=False)
+parser.add_argument('-m','--mongo', help='Mongodb host IP server', default="127.0.0.1", required=False)
+parser.add_argument('-d','--dir', help='Directory containing checks', default="", required=False)
 args = parser.parse_args()
 
 # initialize variables
@@ -38,13 +40,19 @@ no_fly = []
 result = {}
 
 # initialize mongodb
-client = MongoClient()
+client = MongoClient('mongodb://'+args.mongo+':27017/gumbler')
 db = client.gumbler
 
 # these are common checks to look for in input
 def load_checks():
-	for filename in os.listdir(os.getcwd()+"/webserver/checks"):
-		data = json.load(open(os.getcwd()+"/webserver/checks/"+filename))
+
+	if args.dir:
+		ws_dir = os.path.join(args.dir+"/webserver/checks/")
+	else:
+		ws_dir = os.path.join(os.getcwd()+"/webserver/checks/")
+
+	for filename in os.listdir(ws_dir):
+		data = json.load(open(ws_dir+filename))
 		data["filename"] = filename
 
 		# load the check, must be unique by name
@@ -56,7 +64,13 @@ if args.output == "server":
 		print("Please provide a directory containing JSON files \n \t\t python gumbler.py -o server -x ./output/")
 		sys.exit()
 	server.dira = args.server
+	if args.mongo:
+		server.mongo = args.mongo
+	else:
+		server.mongo = "localhost"
 	load_checks()
+	print("|+| Using db, "+'mongodb://'+server.mongo+':27017/gumbler')
+	server.db = db
 	server.app.run(host=args.listen)
 	sys.exit()
 

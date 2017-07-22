@@ -9,14 +9,21 @@ services:
       - default
     volumes:
       - ./data/db:/data/db
+    ports:
+      - 27017
     restart: always
   web:
     build:
       context: .
       dockerfile: ./docker/web
-    command: python /app/gumbler.py -o server -l 0.0.0.0 -x "/app/output/"
+    command: 'python /app/gumbler.py -o server -l 0.0.0.0 -x "/app/output/" -m database -d "/app"
+    '
     ports:
       - 5000:5000
+    environment:
+      - gumbler.database.host=database
+    depends_on:
+      - database
     links:
       - database
     networks:

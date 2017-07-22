@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-from flask_pymongo import PyMongo
+from pymongo import MongoClient
 import argparse
 import os
 import sys
@@ -14,16 +14,16 @@ from bson.json_util import dumps
 
 
 dira = ""
+mongo = ""
+db = ""
 json_l = []
 
 app = Flask(__name__)
 
-# initialize the db, allow user specficied later
-app.config['MONGO_DBNAME'] = 'gumbler'
-mongo = PyMongo(app, config_prefix='MONGO')
-
 @app.route("/")
+
 def main():
+	print('mongodb://'+mongo+':27017/gumbler')
 	return render_template('index.html')
 
 # move to library
@@ -31,13 +31,13 @@ def is_ascii(s):
     return all(ord(c) < 128 for c in s)
 
 def projects():
-	projects = mongo.db.findings.distinct("project")
+	projects = db.findings.distinct("project")
 	return render_template('project.html',projects=projects)
 
 def project():
 	proj = request.args.get("project")
 	# do we need sanitization considerations?
-	projects = mongo.db.findings.find({"project":proj})
+	projects = db.findings.find({"project":proj})
 
 	# this should be refactored 
 	p = []
@@ -53,7 +53,7 @@ def project():
 
 def files():
 	file = request.args.get("file")
-	projects = mongo.db.findings.find({"file":file})
+	projects = db.findings.find({"file":file})
 
 	# this should be refactored 
 	p = []
@@ -67,7 +67,7 @@ def files():
 	return render_template('file_list.html',projects=p)
 
 def check():
-	txt_checks = mongo.db.checks.find()
+	txt_checks = db.checks.find()
 	return render_template('checks.html', txt_checks=txt_checks)
 
 # run a list of regexes across all loaded projects
@@ -76,7 +76,7 @@ def run_regex(regexes,matching_only):
 
 	for regex in regexes:
 		reg = re.compile(regex)
-		findings = mongo.db.findings.find({"results":reg})
+		findings = db.findings.find({"results":reg})
 		for finding in findings:
 			if not ("Error pulling file" in finding["results"]):
 				if finding["results"] == "NOT DOWNLOADED":
