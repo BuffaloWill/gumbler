@@ -35,7 +35,6 @@ http://localhost:5000/files?file=yml
 ## Future Features:
 
 - (Goal) Support svn and mecurial
-- Add vulnerability checks through the webserver (e.g. find potential AWS keys)
 
 
 ## Warning
