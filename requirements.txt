@@ -3,3 +3,4 @@ gitpython
 argparse
 flask
 pymongo
+flask-paginate
