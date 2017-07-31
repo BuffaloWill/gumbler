@@ -1,14 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <title>Gumbler</title>
 
 
-    <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
 
-    <link href="http://getbootstrap.com/examples/jumbotron-narrow/jumbotron-narrow.css" rel="stylesheet">
-
+<style>
+.pagination-page-info {
+    padding: .6em;
+    padding-left: 0;
+    width: 40em;
+    margin: .5em;
+    margin-left: 0;
+    font-size: 12px;
+}
+.pagination-page-info b {
+    color: black;
+    background: #6aa6ed;
+    padding-left: 2px;
+    padding: .1em .25em;
+    font-size: 150%;
+}
+</style>
 
 </head>
 
@@ -25,10 +39,26 @@
             <h3 class="text-muted">Check Results</h3>
         </div>
 
-        {% for result in results %}
+{{ pagination.info }}
+{{ pagination.links }}
 
+	{% if request.args.get("file_list") == "1" %}
+	<div class="row marketing">
+        <div class="col-lg-10">
+	<table>
+	{% for result in results %}
+	<tr>
+	<td>{{ result["project"] }}&nbsp;&nbsp;</td>
+	<td><a href="/show_file?commit={{ result['commit'] }}&file={{ result['file'] }}">{{ result["file"] }}</a></td>
+	</tr>
+	{% endfor %}
+	</table>
+	</div></div>
+	{% endif %}
+        {% for result in results %}
+	{% if not (ignore in result["file"]) %}
         <div class="row marketing">
-            <div class="col-lg-6">
+            <div class="col-lg-10">
             <table>
             <tr>
                 <td><h3>Project:{{ result["project"] }} ({{ result["project_url"] }})<h3></td>
@@ -40,7 +70,7 @@
             <tr>
                 <td><h4>Regex:{{ result["regex"] }}<h4></td>
             </tr>
-
+			
             {% if 'not_downloaded' in result %}
             {% if "url" in result %}
             <tr>
@@ -48,8 +78,8 @@
             </tr>
             {% else %}
             <tr>
-                <td>Command: {{ result["cmd"] }}</a></td>
-            </tr>
+	    <td>Command: <a href="/show_file?commit={{ result['commit'] }}&file={{ result['file'] }}">{{ result["cmd"] }}</a></td>            
+	    </tr>
             {% endif %}
             {% else %}
             {% if "url" in result %}
@@ -58,20 +88,19 @@
             </tr>
             {% else %}
             <tr>
-                <td>Command: {{ result["cmd"] }}</a></td>
+	    <td>Command: <a href="/show_file?commit={{ result['commit'] }}&file={{ result['file'] }}">{{ result["cmd"] }}</a></td>
             </tr>
             {% endif %}
             <tr>
-            <td><pre><code>{{ result["match"] }}</code></pre></td>
+            <td><pre><code>{{ result["match"][0:200] }}</code></pre></td>
             </tr>
 
             {% endif %}
             </table>
             </div>
         </div>
-
+	{% endif %}
        {% endfor %}            
-
         <footer class="footer">
             <p>Gumbler</p>
         </footer>

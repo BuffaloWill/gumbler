@@ -1,0 +1,7 @@
+{
+	"name":"basic_authentication",
+	"display":"HTTP Basic Authentication",
+	"description":"Searches for the string 'Basic '",
+	"check_regex":"Basic ",
+	"references":[""]
+}

@@ -5,9 +5,7 @@
     <title>Gumbler</title>
 
 
-    <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <link href="http://getbootstrap.com/examples/jumbotron-narrow/jumbotron-narrow.css" rel="stylesheet">
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
 
 
 </head>
@@ -25,10 +23,24 @@
             <h3 class="text-muted">Gumbler Data</h3>
         </div>
 
+        {% if request.args.get("file_list") == "1" %}
+	File Listing:
+        <div class="row marketing">
+        <div class="col-lg-10">
+        <table>
+        {% for result in projects %}
+        <tr>
+        <td>{{ result["project"] }}</td>
+        <td><a href="/show_file?commit={{ result['commit'] }}&file={{ result['file'] }}">{{ result["file"] }}</a></td>
+        </tr>
+        {% endfor %}
+        </table>
+        </div></div>
+        {% endif %}
         {% for result in projects %}
 
         <div class="row marketing">
-            <div class="col-lg-6">
+            <div class="col-lg-10">
             <table>
             <tr>
                 <td><h4>{{ result["project"] }}<h4></td>
@@ -43,7 +55,7 @@
             </tr>
             {% else %}
             <tr>
-                <td>Command: {{ result["cmd"] }}</a></td>
+	    <td>Command: <a href="/show_file?commit={{ result['commit'] }}&file={{ result['file'] }}">{{ result["cmd"] }}</a></td>
             </tr>
             {% endif %}
             {% else %}
@@ -53,11 +65,11 @@
             </tr>
             {% else %}
             <tr>
-                <td>Command: {{ result["cmd"] }}</a></td>
-            </tr>
+	    <td>Command: <a href="/show_file?commit={{ result['commit'] }}&file={{ result['file'] }}">{{ result["cmd"] }}</a></td>            
+	    </tr>
             {% endif %}
             {% if 'is_ascii' in result %}
-                <td><pre><code>{{ result["results"] }}</code></pre></td>
+                <td><pre><code>{{ result["results"][0:100] }}</code></pre></td>
             {% else %}
                 <td><pre><code>BINARY IN FILE, DOWNLOAD RAW</code></pre></td>
             </tr>

@@ -5,10 +5,27 @@
     <title>Gumber Server</title>
 
 
-    <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
 
-    <link href="http://getbootstrap.com/examples/jumbotron-narrow/jumbotron-narrow.css" rel="stylesheet">
+    <link href="/examples/jumbotron-narrow.css" rel="stylesheet">
+<style>
 
+.pagination-page-info {
+    padding: .6em;
+    padding-left: 0;
+    width: 40em;
+    margin: .5em;
+    margin-left: 0;
+    font-size: 12px;
+}
+.pagination-page-info b {
+    color: black;
+    background: #6aa6ed;
+    padding-left: 2px;
+    padding: .1em .25em;
+    font-size: 150%;
+}
+</style>
 
 </head>
 
@@ -23,13 +40,16 @@
                 </ul>
             </nav>
             <h3 class="text-muted">Gumbler Data</h3>
+{{ pagination.info }}
+{{ pagination.links }}
         </div>
 
         <div class="row marketing">
-            <div class="col-lg-6">
+            <div class="col-lg-10">
             <table>
             {% for result in projects %}
             <tr>
+
                 <td><a href="/project?project={{ result }}">{{ result }}</a></td>
             </tr>
             {% endfor %}            

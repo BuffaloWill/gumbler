@@ -1,0 +1,7 @@
+{
+	"name":"private_key",
+	"display":"SSH Private Key",
+	"description":"Looks for the string BEGIN RSA PRIVATE KEY",
+	"check_regex":"BEGIN RSA PRIVATE KEY",
+	"references":[""]
+}

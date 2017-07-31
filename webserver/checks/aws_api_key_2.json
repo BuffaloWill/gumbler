@@ -1,0 +1,7 @@
+{
+	"name":"aws_api_20_char",
+	"display":"AWS API Key Check",
+	"description":"Looks for a 20 character string, common to AWS API key (high false positive rate)",
+	"check_regex":"[A-Z0-9]{20}",
+	"references":["https://gist.github.com/DmZ/3a99d829f17af383712b"]
+}

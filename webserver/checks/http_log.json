@@ -1,0 +1,7 @@
+{
+	"name":"http_log",
+	"display":"HTTP Log Searching",
+	"description":"Tries to find http logs",
+	"check_regex":"GET //",
+	"references":[""]
+}

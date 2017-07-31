@@ -1,16 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <title>Gumbler</title>
-
-
-    <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <link href="http://getbootstrap.com/examples/jumbotron-narrow/jumbotron-narrow.css" rel="stylesheet">
-
-
-</head>
+{% include "header.html" %}
 
 <body>
 
@@ -26,14 +14,16 @@
         </div>
 
         <div class="row marketing">
-            <div class="col-lg-6">
+            <div class="col-lg-10">
                 <a href="/list"><h4>List of all projects</h4></a>
 
-                <a href="/org?org=test"><h4>Search for projects by one org (e.g. test)</h4></a>
+                <a href="/orgs?org=test"><h4>Search for a project</h4></a>
                 
                 <a href="/files?file=gemfile"><h4>Display all files matching name</h4></a>
 
                 <a href="/project?project=x"><h4>Display a project</h4></a>
+
+                <a href="/check"><h4>Common Text Checks</h4></a>
             </div>
         </div>
 

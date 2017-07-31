@@ -1,7 +1,7 @@
 {
 	"name":"aws_api",
 	"display":"AWS API Key Check",
-	"description":"Looks for an AWS API key in all downloaded files",
-	"check_regex":["[A-Z0-9]{20}","[A-Za-z0-9/\\+=]{40}","aws_access_key_id","aws_secret_access_key"],
+	"description":"Looks for a 40 character string similar to an AWS API key in all downloaded files",
+	"check_regex":"[A-Za-z0-9/\\+=]{40}",
 	"references":["https://gist.github.com/DmZ/3a99d829f17af383712b"]
 }

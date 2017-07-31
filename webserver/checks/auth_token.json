@@ -1,0 +1,7 @@
+{
+	"name":"auth_token",
+	"display":"Auth Token",
+	"description":"Searches for the string auth_token",
+	"check_regex":"auth_token",
+	"references":[""]
+}

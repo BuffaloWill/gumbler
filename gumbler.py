@@ -28,6 +28,7 @@ parser.add_argument('-l','--listen', help='Address to bind server to', default="
 parser.add_argument('-o','--output', help='By default output is json. Other options: html,server', default="json", required=False)
 parser.add_argument('-m','--mongo', help='Mongodb host IP server', default="127.0.0.1", required=False)
 parser.add_argument('-d','--dir', help='Directory containing checks', default="", required=False)
+
 args = parser.parse_args()
 
 # initialize variables

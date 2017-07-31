@@ -20,7 +20,6 @@
             <h3 class="text-muted">Gumbler Data</h3>
         </div>
 
-        {% for result in projects %}
 
         <div class="row marketing">
             <div class="col-lg-10">
@@ -28,9 +27,6 @@
             <tr>
                 <td><h3>Commit:{{ result["commit"] }}<h3></td>
             </tr>
-	    {% if 'gitignore' in result %}
-	    <tr><td><b>gitignore</b></td></tr>	
-	    {% endif %}
             {% if 'not_downloaded' in result %}
             {% if "url" in result %}
             <tr>
@@ -38,7 +34,7 @@
             </tr>
             {% else %}
             <tr>
-		<td>Command: <a href="/show_file?commit={{ result['commit'] }}&file={{ result['file'] }}">{{ result["cmd"] }}</a></td>
+                <td>Command: <a href="/show_file?commit={{ result['commit'] }}&file={{ result['file'] }}">{{ result["cmd"] }}</a></td>
             </tr>
             {% endif %}
             {% else %}
@@ -48,12 +44,12 @@
             </tr>
             {% else %}
             <tr>
-		<td>Command: <a href="/show_file?commit={{ result['commit'] }}&file={{ result['file'] }}">{{ result["cmd"] }}</a></td>
+                <td>Command: {{ result["cmd"] }}</a></td>
             </tr>
             {% endif %}
             <tr>
             {% if 'is_ascii' in result %}
-                <td><pre><code>{{ result["results"][0:100] }}</code></pre></td>
+                <td><pre><code>{{ result["results"] }}</code></pre></td>
             {% else %}
                 <td><pre><code>BINARY IN FILE, DOWNLOAD RAW</code></pre></td>
             </tr>
@@ -64,7 +60,6 @@
             </div>
         </div>
 
-       {% endfor %}            
 
         <footer class="footer">
             <p>Gumbler</p>

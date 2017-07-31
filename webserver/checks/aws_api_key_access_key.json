@@ -1,0 +1,7 @@
+{
+	"name":"aws_api_access_key",
+	"display":"AWS API Key Check - Configuration Setting",
+	"description":"Looks for aws_access_key_id",
+	"check_regex":"aws_access_key_id",
+	"references":["https://gist.github.com/DmZ/3a99d829f17af383712b"]
+}

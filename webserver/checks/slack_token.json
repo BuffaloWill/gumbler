@@ -1,0 +1,7 @@
+{
+	"name":"slack_token",
+	"display":"Slack Token Check",
+	"description":"Looks for slack tokens",
+	"check_regex":"xox(p|b)-\\S{9}-\\S{9}",
+	"references":["Prezi - Repoguard"]
+}
