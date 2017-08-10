@@ -45,6 +45,7 @@
 	{% if request.args.get("file_list") == "1" %}
 	<div class="row marketing">
         <div class="col-lg-10">
+    File List:
 	<table>
 	{% for result in results %}
 	<tr>
@@ -78,7 +79,7 @@
             </tr>
             {% else %}
             <tr>
-	    <td>Command: <a href="/show_file?commit={{ result['commit'] }}&file={{ result['file'] }}">{{ result["cmd"] }}</a></td>            
+	    <td><a href="/show_file?commit={{ result['commit'] }}&file={{ result['file'] }}">{{ result["cmd"] }}</a></td>            
 	    </tr>
             {% endif %}
             {% else %}
@@ -88,7 +89,7 @@
             </tr>
             {% else %}
             <tr>
-	    <td>Command: <a href="/show_file?commit={{ result['commit'] }}&file={{ result['file'] }}">{{ result["cmd"] }}</a></td>
+	    <td><a href="/show_file?commit={{ result['commit'] }}&file={{ result['file'] }}">{{ result["cmd"] }}</a></td>
             </tr>
             {% endif %}
             <tr>

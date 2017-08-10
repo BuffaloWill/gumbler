@@ -55,7 +55,7 @@
             </tr>
             {% else %}
             <tr>
-	    <td>Command: <a href="/show_file?commit={{ result['commit'] }}&file={{ result['file'] }}">{{ result["cmd"] }}</a></td>
+	    <td><a href="/show_file?commit={{ result['commit'] }}&file={{ result['file'] }}">{{ result["cmd"] }}</a></td>
             </tr>
             {% endif %}
             {% else %}
@@ -65,7 +65,7 @@
             </tr>
             {% else %}
             <tr>
-	    <td>Command: <a href="/show_file?commit={{ result['commit'] }}&file={{ result['file'] }}">{{ result["cmd"] }}</a></td>            
+	    <td><a href="/show_file?commit={{ result['commit'] }}&file={{ result['file'] }}">{{ result["cmd"] }}</a></td>            
 	    </tr>
             {% endif %}
             {% if 'is_ascii' in result %}

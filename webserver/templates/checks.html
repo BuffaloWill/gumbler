@@ -29,7 +29,7 @@
             <table>
             {% for result in txt_checks %}
             <tr>
-                <td><a href="/run_check?check={{ result['name'] }}">{{ result['display'] }}</a></td>
+                <td><a href="/run_check?check={{ result['name'] }}&file_list=1">{{ result['display'] }}</a></td>
                 <td>{{ result['description'] }}</td>
             </tr>
             {% endfor %}            
