@@ -34,10 +34,37 @@ def main():
 def is_ascii(s):
     return all(ord(c) < 128 for c in s)
 
+# updates the count value in the projects collection
+def update_project_tallies():
+	projects = db.findings.distinct("project")
+	for project in projects:
+
+		# update the count, one ah ah ah two ah ah ah		
+		count = db.findings.find({"project":project}).count()
+		pr = '{ "project":"'+str(project)+'","count":"'+str(count)+'"}'		
+
+		find_project = db.projects.find_one({"project":project})
+		if find_project == None:
+			# add to the projects collection if not in there
+			db.projects.insert_one(json.loads(pr))
+		else:
+			# set the value otherwise
+			db.projects.update({
+				  'project':project
+				},{
+				  '$set': {
+				    'count': count
+				  }
+				})
+
+
 def projects():
-	projects_ = db.findings.distinct("project")
-        search = request.args.get("search")
-	
+	if request.args.get("recount") == "y":
+		update_project_tallies()
+
+	projects_ = db.projects.find()
+	search = request.args.get("search")
+
 	if not (search == None):
 		projects = []
 		search = request.args.get("search")
@@ -51,7 +78,7 @@ def projects():
 	from_ = 20*(page-1)
 	to_ = 20*page
 	projects_render = projects[from_:to_]
-	pagination = Pagination(page=page, offset=offset, per_page=20, total=len(projects), search=False, record_name='projects')
+	pagination = Pagination(page=page, offset=offset, per_page=20, total=projects.count(), search=False, record_name='projects')
 
 	return render_template('project.html',projects=projects_render, pagination=pagination)
 
@@ -84,24 +111,27 @@ def project():
 
 
 def orgs():
-        projects_ = db.findings.distinct("project")
-        search = request.args.get("org")
+	if request.args.get("recount") == "y":
+		update_project_tallies()
 
-        if not (search == None):
-                projects = []
-                for proj in projects_:
-                        if str(search) in proj.lower():
-                                projects.append(proj)
-        else:
-                projects = projects_
+	projects_ = db.projects.find()
+	search = request.args.get("org")
 
-        page,per_page,offset = get_page_args()
-        from_ = 20*(page-1)
-        to_ = 20*page
-        projects_render = projects[from_:to_]
-        pagination = Pagination(page=page, offset=offset, per_page=20, total=len(projects), search=False, record_name='projects')
+	if not (search == None):
+		projects = []
+		for proj in projects_:
+			if str(search) in proj["project"].lower():
+				projects.append(proj)
+	else:
+		projects = projects_
 
-        return render_template('project.html',projects=projects_render, pagination=pagination)
+	page,per_page,offset = get_page_args()
+	from_ = 20*(page-1)
+	to_ = 20*page
+	projects_render = projects[from_:to_]
+	pagination = Pagination(page=page, offset=offset, per_page=20, total=len(projects), search=False, record_name='projects')
+
+	return render_template('project.html',projects=projects_render, pagination=pagination)
 
 def files():
 	file_ = request.args.get("file")

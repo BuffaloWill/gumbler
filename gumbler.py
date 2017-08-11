@@ -8,6 +8,7 @@ import string
 import json
 import re
 import fnmatch
+import glob
 from pymongo import MongoClient
 from webserver import server
 from git import *
@@ -22,7 +23,7 @@ parser.add_argument('-s','--store', help='Where to store project, defaults to /t
 parser.add_argument('-g','--gitignore', help='Gitignore file', default="", required=False)
 parser.add_argument('-b','--branch', help='git branch', default="", required=False)
 parser.add_argument('-a','--all', help='iterate all branches', action='store_true', required=False)
-parser.add_argument('-j','--json', help='convert json to html', default="", required=False)
+parser.add_argument('-j','--json', help='import json file into mongo', default="", required=False)
 parser.add_argument('-x','--server', help='Directory to server content from', default="NULL", required=False)
 parser.add_argument('-l','--listen', help='Address to bind server to', default="127.0.0.1", required=False)
 parser.add_argument('-o','--output', help='By default output is json. Other options: html,server', default="json", required=False)
@@ -61,9 +62,6 @@ def load_checks():
 			db.checks.insert_one(json.loads(dumps(data)))
 
 if args.output == "server":
-	if args.server == "NULL":
-		print("Please provide a directory containing JSON files \n \t\t python gumbler.py -o server -x ./output/")
-		sys.exit()
 	server.dira = args.server
 	if args.mongo:
 		server.mongo = args.mongo
@@ -104,6 +102,7 @@ def iterate_commits(commits):
 			for x in commit.diff(parent):
 				compare_target_list(ignores,x.b_path,commit)
 
+
 # Take in a list of commits for a branch and check for target files
 def iterate_commits_ba(commits):
 	for commit in commits:
@@ -129,6 +128,13 @@ def get_project_url(project):
 		return Repo(project).config_reader().get_value("remote \"origin\"","url")
 	except Exception as e:
 		return "Could not find a project URL"
+
+# Save the project into a collection called projects
+def save_project_db(project):
+	if db.projects.find_one({"name":str(project)}) == None:
+		# insert the project into database	
+		pr = '{ "project":"'+str(project)+'","count":0}'
+		db.projects.insert_one(json.loads(pr))
 
 # gets the file contents given a commit hash and filename
 def get_file_contents(key,val):
@@ -186,7 +192,9 @@ def create_output():
 	
 	with open("./output/"+string.replace(args.project,"/","_")+".json", 'w') as the_file:
 		the_file.write(json.dumps(results))
-
+	
+	save_project_db(args.repo)
+	
 	print("|+| Updated MongoDB")
 	print("|+| Wrote output to "+"./output/"+string.replace(args.project,"/","_")+".json")
 
@@ -226,18 +234,33 @@ def temp_print():
 		for val in value:
 			print "|+| File:"+val
 
+def load_json(json_data):	
+	for finding in json_data:
+		# check existing values in the database to make sure we don't duplicate
+		#   commit and filename together are unique		
+		if db.findings.find_one({"commit":finding["commit"],"file":finding["file"]}) == None:
+			print "|+| Inserting finding with commit:"+finding["commit"]+" file:"+finding["file"]
+			# insert the finding into database	
+			db.findings.insert_one(finding)
+		else:
+			print "|-| Duplicate finding with commit:"+finding["commit"]+" file:"+finding["file"]
+
 # print usage info
 def usage():
 	parser.print_help()	
 
 if args.json:
-	datas = json.load(open(args.json))
-	print("|+| Writing output to "+"./output/"+args.json+".html")
-	json_to_html(datas,args.json)
+	if os.path.isdir(args.json):
+		# process the entire directory
+		for f in glob.glob(args.json+"/*.json"):
+			print "|+| Importing "+f
+			load_json(json.load(open(f)))
+	else:		
+		findings = json.load(open(args.json))
 	sys.exit(0)
 
 if args.repo == "":
-	print("|!| Supply repo")
+	print("|!| No repository given")
 	usage()
 	sys.exit(0)
 

@@ -40,6 +40,7 @@
                 </ul>
             </nav>
             <h3 class="text-muted">Gumbler Data</h3>
+            <a href="/list?recount=y">Update Project Findings Count (Beware: slow but required)</a>
 {{ pagination.info }}
 {{ pagination.links }}
         </div>
@@ -49,17 +50,13 @@
             <table>
             {% for result in projects %}
             <tr>
-
-                <td><a href="/project?project={{ result }}">{{ result }}</a></td>
+                <td><a href="/project?project={{ result["project"] }}">{{ result["project"] }}</a></td>
+                <td>&nbsp;&nbsp;&nbsp;{{ result["count"] }}</td>
             </tr>
             {% endfor %}            
             </table>
             </div>
         </div>
-
-        <footer class="footer">
-            <p>&copy; Gumbler</p>
-        </footer>
 
     </div>
 </body>
