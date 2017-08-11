@@ -19,7 +19,7 @@ from bson.json_util import dumps
 parser = argparse.ArgumentParser()
 parser.add_argument('-r','--repo', help='Repo to check', default="", required=False)
 parser.add_argument('-p','--project', help='Remote project to check', default="", required=False)
-parser.add_argument('-s','--store', help='Where to store project, defaults to /tmp IMPLEMENT', default="", required=False)
+parser.add_argument('-s','--store', help='URL of a remote project', default="", required=False)
 parser.add_argument('-g','--gitignore', help='Gitignore file', default="", required=False)
 parser.add_argument('-b','--branch', help='git branch', default="", required=False)
 parser.add_argument('-a','--all', help='iterate all branches', action='store_true', required=False)
@@ -29,6 +29,7 @@ parser.add_argument('-l','--listen', help='Address to bind server to', default="
 parser.add_argument('-o','--output', help='By default output is json. Other options: html,server', default="json", required=False)
 parser.add_argument('-m','--mongo', help='Mongodb host IP server', default="127.0.0.1", required=False)
 parser.add_argument('-d','--dir', help='Directory containing checks', default="", required=False)
+parser.add_argument('-z','--delete', help='Recursively delete directory containing cloned project  when done*BE CAREFUL*', action="store_true", required=False)
 
 args = parser.parse_args()
 
@@ -47,7 +48,6 @@ db = client.gumbler
 
 # these are common checks to look for in input
 def load_checks():
-
 	if args.dir:
 		ws_dir = os.path.join(args.dir+"/webserver/checks/")
 	else:
@@ -269,10 +269,25 @@ if args.json:
 		findings = json.load(open(args.json))
 	sys.exit(0)
 
-if args.repo == "":
+if args.repo == "" and args.store == "":
 	print("|!| No repository given")
 	usage()
 	sys.exit(0)
+
+if args.store != "":
+	if args.project == "":
+		print("|!| No repository given, store requires -p also")
+		usage()
+		sys.exit(0)
+	spl = args.project.split("/")
+	name = spl[-2]+"/"+spl[-1]
+	#if not os.path.isdir(args.store):
+	args.store = args.store + "/"+name
+
+	print("|+| Cloning remote project "+args.project+" into "+args.store)
+	Repo.clone_from(args.project,args.store)
+	args.repo = args.store
+	args.project = name
 
 if args.project == "":
 	args.project = "LOCAL_"+args.repo
@@ -339,3 +354,12 @@ if args.output == "html":
 	print "|+| Writing output to "+file+".html"
 	json_to_html(datas,string.replace(args.project,"/","_")+".json")
 
+
+# the user has to uncomment this code and understand what it does before using it
+if args.delete:
+	print("|!| You will need to uncomment this code in order to use recursive delete. ")
+#if args.delete:
+#	if not args.store == "":
+#		from shutil import rmtree
+#		print("|!| Deleting recursively "+args.store)
+#		rmtree(args.store)
