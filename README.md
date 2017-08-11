@@ -15,6 +15,14 @@ python gumbler.py -o server -x "./output"
 python gumbler.py -r "./projects/[REPO_NAME]" -a 
 python gumbler.py -o server 
 ```
+
+### To clone a remote repo, store the results in the project directory, and analyze:
+```
+python gumbler.py -s projects -p https://github.com/BuffaloWill/NaughtyGitProject.git
+python gumbler.py -o server 
+```
+
+
 ### To import a previously generated json file into the database
 ```
 python gumbler.py -j output/myfile.json
