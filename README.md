@@ -13,7 +13,15 @@ python gumbler.py -o server -x "./output"
 ### To parse a local repo and view the results:
 ```
 python gumbler.py -r "./projects/[REPO_NAME]" -a 
-python gumbler.py -o server -x "./output"
+python gumbler.py -o server 
+```
+### To import a previously generated json file into the database
+```
+python gumbler.py -j output/myfile.json
+
+# import the entire directory containing json files
+
+python gumbler.py -j output
 ```
 
 ### To view all files from results containing yml
