@@ -130,11 +130,21 @@ def get_project_url(project):
 		return "Could not find a project URL"
 
 # Save the project into a collection called projects
-def save_project_db(project):
+def save_project_db(project,count):
 	if db.projects.find_one({"name":str(project)}) == None:
 		# insert the project into database	
-		pr = '{ "project":"'+str(project)+'","count":0}'
+		pr = '{ "project":"'+str(project)+'","count":"'+str(count)+'"}'
 		db.projects.insert_one(json.loads(pr))
+	else:
+		count = db.findings.find({"project":project}).count()
+		# set the value otherwise
+		db.projects.update({
+			  'project':project
+			},{
+			  '$set': {
+			    'count': count
+			  }
+			})
 
 # gets the file contents given a commit hash and filename
 def get_file_contents(key,val):
@@ -193,7 +203,7 @@ def create_output():
 	with open("./output/"+string.replace(args.project,"/","_")+".json", 'w') as the_file:
 		the_file.write(json.dumps(results))
 	
-	save_project_db(args.repo)
+	save_project_db(args.repo,0)
 	
 	print("|+| Updated MongoDB")
 	print("|+| Wrote output to "+"./output/"+string.replace(args.project,"/","_")+".json")
