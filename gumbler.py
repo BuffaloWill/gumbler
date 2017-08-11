@@ -153,6 +153,14 @@ def get_file_contents(key,val):
 	except Exception as e:
 		return "|!| Error pulling file, used command 'git show "+key+":"+val+"'"
 
+# gets the commit dat
+def get_committed_date(key):
+	try:
+		return Repo(args.repo).commit(key).committed_date
+	except Exception as e:
+		return "|!| Error pulling committed date"
+
+
 # create the json file from the results
 def create_output():
 	results = []
@@ -169,6 +177,7 @@ def create_output():
 					result["cmd"] = "git show "+key+":"+val
 					result["file"] = val
 					result["results"] = get_file_contents(key,val)
+					result["commit_date"] = get_committed_date(key)
 				else:
 					result["project"] = args.project
 					result["project_url"] = get_project_url(args.repo)					
@@ -176,6 +185,7 @@ def create_output():
 					result["url"] = url
 					result["file"] = val
 					result["results"] = get_file_contents(key,val)
+					result["commit_date"] = get_committed_date(key)
 			else:
 				if "LOCAL_" in args.project:
 					result["project"] = args.repo
@@ -183,12 +193,15 @@ def create_output():
 					result["cmd"] = "git show "+key+":"+string.replace(val,"_NO_DOWNLOAD","")
 					result["file"] = string.replace(val,"_NO_DOWNLOAD","")
 					result["results"] = "NOT RETRIEVED, LIKELY BINARY CONTENT"
+					result["commit_date"] = get_committed_date(key)
 				else:
 					result["project"] = args.project
 					result["project_url"] = get_project_url(args.repo)					
 					url = "https://raw.githubusercontent.com/"+args.project+"/"+key+"/"+val.split("_NO_DOWNLOAD")[0]
 					result["url"] = url
 					result["results"] = "NOT DOWNLOADED, LIKELY BINARY CONTENT"
+					result["commit_date"] = get_committed_date(key)
+
 		# insert the finding into an array to return a json file		
 		results.append(result)
 
