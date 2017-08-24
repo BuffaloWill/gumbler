@@ -15,6 +15,8 @@ from git import *
 from datetime import datetime
 from bson import Binary, Code
 from bson.json_util import dumps
+# import gumbler helpers
+from lib import helper
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-r','--repo', help='Repo to check', default="", required=False)
@@ -46,7 +48,7 @@ result = {}
 client = MongoClient('mongodb://'+args.mongo+':27017/gumbler')
 db = client.gumbler
 
-# these are common checks to look for in input
+# load the webserver checks into the db
 def load_checks():
 	if args.dir:
 		ws_dir = os.path.join(args.dir+"/webserver/checks/")
@@ -61,6 +63,7 @@ def load_checks():
 		if db.checks.find_one({"name":data["name"]}) == None:
 			db.checks.insert_one(json.loads(dumps(data)))
 
+# if the user wants to load the webserver, start it up
 if args.output == "server":
 	server.dira = args.server
 	if args.mongo:
@@ -110,25 +113,6 @@ def iterate_commits_ba(commits):
 		for path,value in files.items():
 			compare_target_list(ignores,path,commit)
 
-def clean(branch):
-	if branch[0] == "*":
-		return branch.split(" ")[1]
-	else:
-		return branch.split(" ")[2]
-
-# read in the list of common files
-def checks():
-	with open("files_to_look_for.txt") as f:
-   		extras = f.read().splitlines()
-	return extras
-
-# get the remote origin project url from the configuration
-def get_project_url(project):
-	try:
-		return Repo(project).config_reader().get_value("remote \"origin\"","url")
-	except Exception as e:
-		return "Could not find a project URL"
-
 # Save the project into a collection called projects
 def save_project_db(project,count):
 	if db.projects.find_one({"name":str(project)}) == None:
@@ -146,20 +130,6 @@ def save_project_db(project,count):
 			  }
 			})
 
-# gets the file contents given a commit hash and filename
-def get_file_contents(key,val):
-	try:
-		return Repo(args.repo).git.show(key+":"+val)
-	except Exception as e:
-		return "|!| Error pulling file, used command 'git show "+key+":"+val+"'"
-
-# gets the commit dat
-def get_committed_date(key):
-	try:
-		return Repo(args.repo).commit(key).committed_date
-	except Exception as e:
-		return "|!| Error pulling committed date"
-
 
 # create the json file from the results
 def create_output():
@@ -173,34 +143,34 @@ def create_output():
 				result["date"] = str(datetime.now())				
 				if "LOCAL_" in args.project:
 					result["project"] = args.repo
-					result["project_url"] = get_project_url(args.repo)
+					result["project_url"] = helper.get_project_url(args.repo)
 					result["cmd"] = "git show "+key+":"+val
 					result["file"] = val
-					result["results"] = get_file_contents(key,val)
-					result["commit_date"] = get_committed_date(key)
+					result["results"] = helper.get_file_contents(key,val)
+					result["commit_date"] = helper.get_committed_date(key)
 				else:
 					result["project"] = args.project
-					result["project_url"] = get_project_url(args.repo)					
+					result["project_url"] = helper.get_project_url(args.repo)					
 					url = "https://raw.githubusercontent.com/"+args.project+"/"+key+"/"+val
 					result["url"] = url
 					result["file"] = val
-					result["results"] = get_file_contents(key,val)
-					result["commit_date"] = get_committed_date(key)
+					result["results"] = helper.get_file_contents(key,val)
+					result["commit_date"] = helper.get_committed_date(key)
 			else:
 				if "LOCAL_" in args.project:
 					result["project"] = args.repo
-					result["project_url"] = get_project_url(args.repo)
+					result["project_url"] = helper.get_project_url(args.repo)
 					result["cmd"] = "git show "+key+":"+string.replace(val,"_NO_DOWNLOAD","")
 					result["file"] = string.replace(val,"_NO_DOWNLOAD","")
 					result["results"] = "NOT RETRIEVED, LIKELY BINARY CONTENT"
-					result["commit_date"] = get_committed_date(key)
+					result["commit_date"] = helper.get_committed_date(key)
 				else:
 					result["project"] = args.project
-					result["project_url"] = get_project_url(args.repo)					
+					result["project_url"] = helper.get_project_url(args.repo)					
 					url = "https://raw.githubusercontent.com/"+args.project+"/"+key+"/"+val.split("_NO_DOWNLOAD")[0]
 					result["url"] = url
 					result["results"] = "NOT DOWNLOADED, LIKELY BINARY CONTENT"
-					result["commit_date"] = get_committed_date(key)
+					result["commit_date"] = helper.get_committed_date(key)
 
 		# insert the finding into an array to return a json file		
 		results.append(result)
@@ -222,41 +192,6 @@ def create_output():
 	print("|+| Wrote output to "+"./output/"+string.replace(args.project,"/","_")+".json")
 
 
-# check if the file contains non-ascii chars, if so don't present in the server
-def is_ascii(s):
-    return all(ord(c) < 128 for c in s)
-
-# convert the json file to html output, kind of ugly
-def json_to_html(datas,name):
-	with open(name+".html", 'w') as the_file:
-		myfile = open("./output/template.html","r")
-		lines = myfile.read()
-		the_file.write(lines)
-		for data in datas:
-			if len(data) > 0:
-				data["project"] = "UNKNOWN PROJECT"
-				the_file.write("<h2>Project:"+data["project"]+"</h2><br>")
-
-				if data["results"] == "NOT DOWNLOADED":
-					the_file.write("<h3>Commit:"+data["commit"]+"</h3><br>")
-					the_file.write("Not downloaded: <a href=\""+data["url"]+"\">"+data["url"]+"</a><br>")
-				else:
-					the_file.write("<h3>Commit:"+data["commit"]+"</h3><br>")
-					the_file.write("<a href=\""+data["url"]+"\">"+data["url"]+"</a><br><br>")
-
-					if is_ascii(data["results"]):
-						the_file.write("<pre><code>"+data["results"].replace("<","&lt;").replace(">","&gt;")+"</code></pre>")
-					else:
-						the_file.write("<pre><code>BINARY IN FILE, DOWNLOAD RAW</code></pre>")						
-		the_file.write("</html>")
-
-def temp_print():
-	for key,value in hits.iteritems():
-		# open the output file
-		print("|+| Commit:"+str(key))
-		for val in value:
-			print "|+| File:"+val
-
 def load_json(json_data):	
 	for finding in json_data:
 		# check existing values in the database to make sure we don't duplicate
@@ -272,6 +207,7 @@ def load_json(json_data):
 def usage():
 	parser.print_help()	
 
+# import json files into the DB
 if args.json:
 	if os.path.isdir(args.json):
 		# process the entire directory
@@ -330,7 +266,7 @@ else:
 		if (len(line) > 0) and (line[0] != "#"):
 			ignores.append(line)
 
-ignores = ignores + checks()
+ignores = ignores + helper.checks()
 
 try:
 	br = ""
@@ -344,7 +280,7 @@ try:
 		branches = git.branch("-a").split("\n")
 		print "|+| Total branches: "+str(len(branches))
 		for branch in branches:
-			br = clean(branch)
+			br = helper.clean(branch)
 			commits = list(repo.iter_commits(str(br)))
 			print "|+| Iterating "+str(br)+"   total commits:"+str(len(commits))
 			iterate_commits_ba(commits)
@@ -361,11 +297,13 @@ except Exception,e:
 
 create_output()
 
+# convert the json file to html
+#	This is not valuable, the server should just include an export function
 if args.output == "html":
 	file = "./output/"+string.replace(args.project,"/","_")+".json"	
 	datas = json.load(open(file))
 	print "|+| Writing output to "+file+".html"
-	json_to_html(datas,string.replace(args.project,"/","_")+".json")
+	helper.json_to_html(datas,string.replace(args.project,"/","_")+".json")
 
 
 # the user has to uncomment this code and understand what it does before using it
