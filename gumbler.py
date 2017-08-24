@@ -16,7 +16,7 @@ from datetime import datetime
 from bson import Binary, Code
 from bson.json_util import dumps
 # import gumbler helpers
-from lib import helper
+from lib import helper,finding
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-r','--repo', help='Repo to check', default="", required=False)
@@ -77,25 +77,51 @@ if args.output == "server":
 	sys.exit()
 
 
-def add_to_commits(commit, file):
+def add_to_commits(commit, f):
 	if commit in hits:
 		if not file in hits[commit]:
-			hits[commit].append(file)
+			f.commit = commit
+			hits[commit].append(f)
 	else:
-		hits[commit] = [file]
+		f.commit = commit
 
-# Iterate each file in target list against commits
+		hits[commit] = [f]
+
+# Iterate each file in target list against commits	
 def compare_target_list(target_list, file, commit):
+	# iterate files_to_look_for.txt
+	for target in helper.checks():
+		if ("*" in target) and not (target in no_fly):
+			try:
+				regex = re.compile(fnmatch.translate(target))
+				if regex.search(file):
+					f = finding.Finding()
+					f.file = file+"_NO_DOWNLOAD"
+					add_to_commits(str(commit), f)
+			except Exception as e:
+				"ignore error"
+		if target in file:
+			f = finding.Finding()
+			f.file = file
+			add_to_commits(str(commit), f)
+
+	# iterate the gitignore file
 	for target in target_list:
 		if ("*" in target) and not (target in no_fly):
 			try:
 				regex = re.compile(fnmatch.translate(target))
 				if regex.search(file):
-					add_to_commits(str(commit), file+"_NO_DOWNLOAD")
+					f = finding.Finding()
+					f.is_gitignore = True
+					f.file = file+"_NO_DOWNLOAD"
+					add_to_commits(str(commit), f)
 			except Exception as e:
 				"ignore error"
 		if target in file:
-			add_to_commits(str(commit), file)
+			f = finding.Finding()
+			f.file = file
+			f.is_gitignore = True
+			add_to_commits(str(commit), f)
 
 # Alternative way to iterate commits, not used right now
 def iterate_commits(commits):
@@ -130,58 +156,76 @@ def save_project_db(project,count):
 			  }
 			})
 
+# gets the commit data 
+def get_committed_date(key):
+	try:
+		return Repo(args.repo).commit(key).committed_date
+	except Exception as e:
+		return "|!| Error pulling committed date"
+
+# gets the file contents given a commit hash and filename
+def get_file_contents(key,val):
+	try:
+		return Repo(args.repo).git.show(key+":"+val)
+	except Exception as e:
+		return "|!| Error pulling file, used command 'git show "+key+":"+val+"'"
+
 
 # create the json file from the results
 def create_output():
 	results = []
 	for key,value in hits.iteritems():
-		result = {}
-		
-		result["commit"] = str(key)
+		# key => commit hash
+		# value => a finding
+
+		# iterate each finding at this commit
 		for val in value:
-			if not ("NO_DOWNLOAD" in val):
-				result["date"] = str(datetime.now())				
+			# initialize the finding
+			result = val
+			
+			if not ("NO_DOWNLOAD" in val.file):
+				result.date = str(datetime.now())				
 				if "LOCAL_" in args.project:
-					result["project"] = args.repo
-					result["project_url"] = helper.get_project_url(args.repo)
-					result["cmd"] = "git show "+key+":"+val
-					result["file"] = val
-					result["results"] = helper.get_file_contents(key,val)
-					result["commit_date"] = helper.get_committed_date(key)
+					result.project = args.repo
+					result.project_url = helper.get_project_url(args.repo)
+					result.cmd = "git show "+key+":"+val.file
+					result.file = val.file
+					result.results = get_file_contents(key,val.file)
+					result.commit_date = get_committed_date(key)
 				else:
-					result["project"] = args.project
-					result["project_url"] = helper.get_project_url(args.repo)					
-					url = "https://raw.githubusercontent.com/"+args.project+"/"+key+"/"+val
-					result["url"] = url
-					result["file"] = val
-					result["results"] = helper.get_file_contents(key,val)
-					result["commit_date"] = helper.get_committed_date(key)
+					result.project = args.project
+					result.project_url = helper.get_project_url(args.repo)					
+					url = "https://raw.githubusercontent.com/"+args.project+"/"+key+"/"+val.file
+					result.url = url
+					result.file = val.file
+					result.results = get_file_contents(key,val.file)
+					result.commit_date = get_committed_date(key)
 			else:
 				if "LOCAL_" in args.project:
-					result["project"] = args.repo
-					result["project_url"] = helper.get_project_url(args.repo)
-					result["cmd"] = "git show "+key+":"+string.replace(val,"_NO_DOWNLOAD","")
-					result["file"] = string.replace(val,"_NO_DOWNLOAD","")
-					result["results"] = "NOT RETRIEVED, LIKELY BINARY CONTENT"
-					result["commit_date"] = helper.get_committed_date(key)
+					result.project = args.repo
+					result.project_url = helper.get_project_url(args.repo)
+					result.cmd = "git show "+key+":"+string.replace(val.file,"_NO_DOWNLOAD","")
+					result.file = string.replace(val.file,"_NO_DOWNLOAD","")
+					result.results = "NOT RETRIEVED, LIKELY BINARY CONTENT"
+					result.commit_date = get_committed_date(key)
 				else:
-					result["project"] = args.project
-					result["project_url"] = helper.get_project_url(args.repo)					
-					url = "https://raw.githubusercontent.com/"+args.project+"/"+key+"/"+val.split("_NO_DOWNLOAD")[0]
-					result["url"] = url
-					result["results"] = "NOT DOWNLOADED, LIKELY BINARY CONTENT"
-					result["commit_date"] = helper.get_committed_date(key)
+					result.project = args.project
+					result.project_url = helper.get_project_url(args.repo)					
+					url = "https://raw.githubusercontent.com/"+args.project+"/"+key+"/"+val.file.split("_NO_DOWNLOAD")[0]
+					result.url = url
+					result.results = "NOT DOWNLOADED, LIKELY BINARY CONTENT"
+					result.commit_date = get_committed_date(key)
 
 		# insert the finding into an array to return a json file		
-		results.append(result)
+		results.append(result.__dict__)
 
 		# check existing values in the database to make sure we don't duplicate
 		#   commit and filename together are unique		
-		if db.findings.find_one({"commit":str(key),"file":val}) == None:
+		if db.findings.find_one({"commit":str(key),"file":val.file}) == None:
 			# insert the finding into database	
-			db.findings.insert_one(json.loads(dumps(result)))
+			db.findings.insert_one(json.loads(dumps(result.__dict__)))
 		else:
-			print("|+| Finding not unique, not adding to the database "+str(key)+":"+val)
+			print("|+| Finding not unique, not adding to the database "+str(key)+":"+val.file)
 	
 	with open("./output/"+string.replace(args.project,"/","_")+".json", 'w') as the_file:
 		the_file.write(json.dumps(results))
@@ -265,8 +309,6 @@ else:
 	for line in lines:
 		if (len(line) > 0) and (line[0] != "#"):
 			ignores.append(line)
-
-ignores = ignores + helper.checks()
 
 try:
 	br = ""

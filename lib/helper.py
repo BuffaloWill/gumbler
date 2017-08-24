@@ -55,20 +55,6 @@ def json_to_html(datas,name):
 def is_ascii(s):
     return all(ord(c) < 128 for c in s)
 
-# gets the commit data 
-def get_committed_date(key):
-	try:
-		return Repo(args.repo).commit(key).committed_date
-	except Exception as e:
-		return "|!| Error pulling committed date"
-
-# gets the file contents given a commit hash and filename
-def get_file_contents(key,val):
-	try:
-		return Repo(args.repo).git.show(key+":"+val)
-	except Exception as e:
-		return "|!| Error pulling file, used command 'git show "+key+":"+val+"'"
-
 def clean(branch):
 	if branch[0] == "*":
 		return branch.split(" ")[1]
