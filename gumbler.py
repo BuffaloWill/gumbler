@@ -4,7 +4,7 @@ import argparse
 import os
 import sys
 import requests
-import string 
+import string
 import json
 import re
 import fnmatch
@@ -32,6 +32,7 @@ parser.add_argument('-o','--output', help='By default output is json. Other opti
 parser.add_argument('-m','--mongo', help='Mongodb host IP server', default="127.0.0.1", required=False)
 parser.add_argument('-d','--dir', help='Directory containing checks', default="", required=False)
 parser.add_argument('-z','--delete', help='Recursively delete directory containing cloned project  when done*BE CAREFUL*', action="store_true", required=False)
+parser.add_argument('-c','--comments', help='Search comments from a project', default="", required=False)
 
 args = parser.parse_args()
 
@@ -87,7 +88,7 @@ def add_to_commits(commit, f):
 
 		hits[commit] = [f]
 
-# Iterate each file in target list against commits	
+# Iterate each file in target list against commits
 def compare_target_list(target_list, file, commit):
 	# iterate files_to_look_for.txt
 	for target in helper.checks():
@@ -142,7 +143,7 @@ def iterate_commits_ba(commits):
 # Save the project into a collection called projects
 def save_project_db(project,count):
 	if db.projects.find_one({"name":str(project)}) == None:
-		# insert the project into database	
+		# insert the project into database
 		pr = '{ "project":"'+str(project)+'","count":"'+str(count)+'"}'
 		db.projects.insert_one(json.loads(pr))
 	else:
@@ -156,7 +157,7 @@ def save_project_db(project,count):
 			  }
 			})
 
-# gets the commit data 
+# gets the commit data
 def get_committed_date(key):
 	try:
 		return Repo(args.repo).commit(key).committed_date
@@ -182,9 +183,9 @@ def create_output():
 		for val in value:
 			# initialize the finding
 			result = val
-			
+
 			if not ("NO_DOWNLOAD" in val.file):
-				result.date = str(datetime.now())				
+				result.date = str(datetime.now())
 				if "LOCAL_" in args.project:
 					result.project = args.repo
 					result.project_url = helper.get_project_url(args.repo)
@@ -194,7 +195,7 @@ def create_output():
 					result.commit_date = get_committed_date(key)
 				else:
 					result.project = args.project
-					result.project_url = helper.get_project_url(args.repo)					
+					result.project_url = helper.get_project_url(args.repo)
 					url = "https://raw.githubusercontent.com/"+args.project+"/"+key+"/"+val.file
 					result.url = url
 					result.file = val.file
@@ -210,46 +211,46 @@ def create_output():
 					result.commit_date = get_committed_date(key)
 				else:
 					result.project = args.project
-					result.project_url = helper.get_project_url(args.repo)					
+					result.project_url = helper.get_project_url(args.repo)
 					url = "https://raw.githubusercontent.com/"+args.project+"/"+key+"/"+val.file.split("_NO_DOWNLOAD")[0]
 					result.url = url
 					result.results = "NOT DOWNLOADED, LIKELY BINARY CONTENT"
 					result.commit_date = get_committed_date(key)
 
-		# insert the finding into an array to return a json file		
+		# insert the finding into an array to return a json file
 		results.append(result.__dict__)
 
 		# check existing values in the database to make sure we don't duplicate
-		#   commit and filename together are unique		
+		#   commit and filename together are unique
 		if db.findings.find_one({"commit":str(key),"file":val.file}) == None:
-			# insert the finding into database	
+			# insert the finding into database
 			db.findings.insert_one(json.loads(dumps(result.__dict__)))
 		else:
 			print("|+| Finding not unique, not adding to the database "+str(key)+":"+val.file)
-	
+
 	with open("./output/"+string.replace(args.project,"/","_")+".json", 'w') as the_file:
 		the_file.write(json.dumps(results))
-	
+
 	save_project_db(args.repo,0)
-	
+
 	print("|+| Updated MongoDB")
 	print("|+| Wrote output to "+"./output/"+string.replace(args.project,"/","_")+".json")
 
 
-def load_json(json_data):	
+def load_json(json_data):
 	for finding in json_data:
 		# check existing values in the database to make sure we don't duplicate
-		#   commit and filename together are unique		
+		#   commit and filename together are unique
 		if db.findings.find_one({"commit":finding["commit"],"file":finding["file"]}) == None:
 			print "|+| Inserting finding with commit:"+finding["commit"]+" file:"+finding["file"]
-			# insert the finding into database	
+			# insert the finding into database
 			db.findings.insert_one(finding)
 		else:
 			print "|-| Duplicate finding with commit:"+finding["commit"]+" file:"+finding["file"]
 
 # print usage info
 def usage():
-	parser.print_help()	
+	parser.print_help()
 
 # import json files into the DB
 if args.json:
@@ -258,7 +259,7 @@ if args.json:
 		for f in glob.glob(args.json+"/*.json"):
 			print "|+| Importing "+f
 			load_json(json.load(open(f)))
-	else:		
+	else:
 		findings = json.load(open(args.json))
 	sys.exit(0)
 
@@ -287,9 +288,14 @@ if args.project == "":
 
 try:
     repo = Repo(args.repo)
-except Exception as e: 
+except Exception as e:
 	print(e)
 	sys.exit("no such repo")
+
+if(args.comments != ""):
+	findings = helper.search_comments(repo, args.comments)
+	print(json.dumps(findings))
+	sys.exit()
 
 if (len(args.gitignore) == 0):
 	gi = args.repo+"/.gitignore"
@@ -333,7 +339,7 @@ try:
 		iterate_commits_ba(commits)
 		print ""
 
-except Exception,e: 
+except Exception,e:
 	print str(e)
 	sys.exit("no such branch")
 
@@ -342,7 +348,7 @@ create_output()
 # convert the json file to html
 #	This is not valuable, the server should just include an export function
 if args.output == "html":
-	file = "./output/"+string.replace(args.project,"/","_")+".json"	
+	file = "./output/"+string.replace(args.project,"/","_")+".json"
 	datas = json.load(open(file))
 	print "|+| Writing output to "+file+".html"
 	helper.json_to_html(datas,string.replace(args.project,"/","_")+".json")

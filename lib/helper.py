@@ -1,7 +1,7 @@
 import os
 import sys
 import requests
-import string 
+import string
 import json
 import re
 import fnmatch
@@ -48,7 +48,7 @@ def json_to_html(datas,name):
 					if is_ascii(data["results"]):
 						the_file.write("<pre><code>"+data["results"].replace("<","&lt;").replace(">","&gt;")+"</code></pre>")
 					else:
-						the_file.write("<pre><code>BINARY IN FILE, DOWNLOAD RAW</code></pre>")						
+						the_file.write("<pre><code>BINARY IN FILE, DOWNLOAD RAW</code></pre>")
 		the_file.write("</html>")
 
 # check if the file contains non-ascii chars, if so don't present in the server
@@ -60,6 +60,24 @@ def clean(branch):
 		return branch.split(" ")[1]
 	else:
 		return branch.split(" ")[2]
+
+def search_comments(repo, message):
+	a = {}
+	qqq = []
+
+	git = repo.git
+	branches = git.branch("-a").split("\n")
+	#print "|+| Total branches: "+str(len(branches))
+	for branch in branches:
+		br = clean(branch)
+		commits = list(repo.iter_commits(str(br)))
+		#print "|+| Iterating "+str(br)+"   total commits:"+str(len(commits))
+		for commit in commits:
+			if message in commit.message:
+				a["commit"] = str(commit)
+				a["message"] = commit.message
+				qqq.append(a)
+	return qqq
 
 # get the remote origin project url from the configuration
 def get_project_url(project):
