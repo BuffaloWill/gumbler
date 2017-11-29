@@ -294,7 +294,12 @@ except Exception as e:
 
 if(args.comments != ""):
 	findings = helper.search_comments(repo, args.comments)
-	print(json.dumps(findings))
+
+	for finding in findings:
+		finding["project"] = args.repo
+		if db.findings.find_one({"commit":finding["commit"]}) == None:
+			db.findings.insert_one(json.loads(dumps(finding)))
+
 	sys.exit()
 
 if (len(args.gitignore) == 0):
