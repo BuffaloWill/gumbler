@@ -1,3 +1,10 @@
+# Project no longer maintained. 
+
+Hi! This project is no longer maintained. I would recommend:
+
+- https://github.com/dxa4481/truffleHog
+- https://github.com/awslabs/git-secrets
+
 # gumbler
 
 Gumbler is a tool to dig for sensitive files committed in the history of the project. It uses the .gitignore and a starter file (i.e. files_to_look_for.txt) as a seed list. It then checks every branch and commit to see if that file was committed at some point. 
