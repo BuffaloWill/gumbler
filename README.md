@@ -1,6 +1,6 @@
 # Project no longer maintained. 
 
-Hi! This project is no longer maintained. I would recommend:
+Hi! This project is no longer maintained as better options now exist. I would recommend:
 
 - https://github.com/dxa4481/truffleHog
 - https://github.com/awslabs/git-secrets
