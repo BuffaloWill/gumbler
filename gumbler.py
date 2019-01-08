@@ -85,7 +85,7 @@ if args.output == "server":
 
 def add_to_commits(commit, f):
     if commit in hits:
-        if not file in hits[commit]:
+        if not f in hits[commit]:
             f.commit = commit
             hits[commit].append(f)
     else:
@@ -190,7 +190,7 @@ def get_file_contents(key, val):
 # create the json file from the results
 def create_output():
     results = []
-    for key, value in hits.iteritems():
+    for key, value in hits.items():
         # key => commit hash
         # value => a finding
 

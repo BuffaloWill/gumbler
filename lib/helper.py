@@ -22,7 +22,7 @@ def checks():
 
 
 def temp_print():
-    for key, value in hits.iteritems():
+    for key, value in hits.items():
         # open the output file
         print("|+| Commit:"+str(key))
         for val in value:
